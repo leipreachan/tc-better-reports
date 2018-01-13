@@ -35,7 +35,7 @@ let target = document.querySelector('#tst_group_build_fail');
 
 // create an observer instance
 let observer = new MutationObserver((mutations) => {
-    mutations.forEach(mutation => step);
+    mutations.forEach(mutation => {step();});
 });
 
 // configuration of the observer:
