@@ -30,20 +30,24 @@ function step() {
     });
 }
 
-// select the target node
-let target = document.querySelector('#tst_group_build_fail');
+const nodes = ['#tst_group_build_fail', '#tst_group_build_muteRefresh'];
+
+nodes.every((node)=>{
+    // select the target node
+    let target = document.querySelector(node);
 
 // create an observer instance
-let observer = new MutationObserver((mutations) => {
-    mutations.forEach(mutation => {step();});
-});
+    let observer = new MutationObserver((mutations) => {
+        mutations.forEach(mutation => {step();});
+    });
 
 // configuration of the observer:
-let config = {attributes: true, childList: true, subtree: true, characterData: true};
+    let config = {attributes: true, childList: true, subtree: true, characterData: true};
 
 // pass in the target node, as well as the observer options
-observer.observe(target, config);
+    observer.observe(target, config);
 
-window.onunload = () => {
-    observer.disconnect();
-};
+    window.onunload = () => {
+        observer.disconnect();
+    };
+});
