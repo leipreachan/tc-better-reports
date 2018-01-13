@@ -1,0 +1,9 @@
+code {
+    background-color: #bbb;
+    background-color: rgba(220, 220, 220, .5);
+    border-radius: 2px;
+    box-decoration-break: clone;
+    font-family: consolas, "Liberation Mono", courier, monospace;
+    padding: 2px;
+    word-wrap: break-word;
+}
