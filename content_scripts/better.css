@@ -7,3 +7,11 @@ code {
     padding: 2px;
     word-wrap: break-word;
 }
+
+div.preview {
+    padding: 5px 0;
+}
+
+.preview > img, .preview > video {
+    box-shadow: 0 0 10px dimgray;
+}
