@@ -14,4 +14,9 @@ div.preview {
 
 .preview > img, .preview > video {
     box-shadow: 0 0 10px dimgray;
+    border: 10px solid white;
+}
+
+.preview > img {
+    width: 90%;
 }
