@@ -3,6 +3,7 @@
   "manifest_version": 2,
   "name": "tc-better-reports",
   "version": "0.0.4",
+  "key": "oignakdmnnfphdbkmpejbmonjkcfplii",
   "homepage_url": "http://tech.badoo.com",
   "icons": {
     "512": "icons/report-512.png"
@@ -32,10 +33,5 @@
       "all_frames": true
     }
   ],
-  "applications": {
-    "gecko": {
-      "id": "tc-better-reports@badoo.com",
-      "update_url": "https://my.me2.ru/updates.json"
-    }
-  }
+  "update_url": "https://my.me2.ru/extensions/updates.xml",
 }

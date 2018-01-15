@@ -57,6 +57,7 @@ function preview_media(event) {
 }
 
 function step() {
+    console.debug('better.js', 'step');
     document.querySelectorAll('.fullStacktrace').forEach((item) => {
         if (item.innerHTML.length > 0 && item.querySelector('.test') === null) {
             // replace links
@@ -74,7 +75,7 @@ function step() {
     });
 }
 
-const nodes = ['#tst_group_build_fail', '#tst_group_build_mute'];
+const nodes = ['#buildResults'];
 
 nodes.every((node) => {
     // select the target node
@@ -92,8 +93,10 @@ nodes.every((node) => {
 
 // pass in the target node, as well as the observer options
     observer.observe(target, config);
+    console.debug('better.js', 'observe');
 
     window.onunload = () => {
         observer.disconnect();
+        console.debug('better.js', 'disconnect');
     };
 });
