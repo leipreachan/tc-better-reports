@@ -2,7 +2,7 @@
   "description": "View artifacts in teamcity reports",
   "manifest_version": 2,
   "name": "tc-better-reports",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "homepage_url": "http://tech.badoo.com",
   "icons": {
     "512": "icons/report-512.png"
