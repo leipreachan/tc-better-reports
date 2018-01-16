@@ -1,3 +1,22 @@
+const TRANSFORMATION_RULES = [
+    {
+        from:  "(https?:\\/\\/[^ \\s]+)([ \\s])",
+        to: "<a href='$1' target='_blank' data-preview=''>$1</a>$2"
+    },
+    {
+        from:  "&gt;&gt;(.+)&lt;&lt;",
+        to: ">><code>$1</code><<"
+    },
+    {
+        from:  "(phpunit(.+))\n",
+        to: "<code>$1</code>\n"
+    },
+    {
+        from:  "(features[A-z\\/.]+:\\d+)",
+        to: "<code>$1</code>"
+    }
+];
+
 function preview_media(event) {
     const element = event.target;
     const type = element.href.substr(element.href.lastIndexOf('.') + 1).toLowerCase();
@@ -56,14 +75,29 @@ function preview_media(event) {
     }
 }
 
+function select_code(event)
+{
+    let element = event.target;
+    let range = document.createRange();
+    range.selectNodeContents(element);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+}
+
+function transform(text)
+{
+    TRANSFORMATION_RULES.forEach((item)=>{
+        let rex = new RegExp(item.from, 'g');
+        text = text.replace(rex, item.to);
+    });
+    return text;
+}
+
 function step() {
     console.debug('better.js', 'step');
     document.querySelectorAll('.fullStacktrace').forEach((item) => {
         if (item.innerHTML.length > 0 && item.querySelector('.test') === null) {
-            // replace links
-            item.innerHTML = item.innerHTML.replace(/(https?:\/\/[^ \s]+)([ \s])/gi, '<a href="$1" target="_blank" data-preview="">$1</a>$2');
-            // replace >>anything<<
-            item.innerHTML = item.innerHTML.replace(/&gt;&gt;(.+)&lt;&lt;/gi, '>><code>$1</code><<');
+            item.innerHTML = transform(item.innerHTML);
             // add an invisible span
             let test = document.createElement('span');
             test.setAttribute('class', 'test');
@@ -72,6 +106,9 @@ function step() {
     });
     document.querySelectorAll('.fullStacktrace a').forEach((item) => {
         item.addEventListener('click', preview_media, false);
+    });
+    document.querySelectorAll('.fullStacktrace code').forEach((item) => {
+        item.addEventListener('dblclick', select_code, false);
     });
 }
 
