@@ -8,11 +8,11 @@ const TRANSFORMATION_RULES = [
         to: ">><code>$1</code><<"
     },
     {
-        from:  "(phpunit(.+))\n",
+        from:  "(phpunit\s(.+))\n",
         to: "<code>$1</code>\n"
     },
     {
-        from:  "(features[A-z\\/.]+:\\d+)",
+        from:  "(features\/[A-z0-9\\/.]+:\\d+)",
         to: "<code>$1</code>"
     }
 ];
