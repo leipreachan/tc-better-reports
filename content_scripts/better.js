@@ -1,20 +1,37 @@
 const TRANSFORMATION_RULES = [
     {
-        from:  "(https?:\\/\\/[^ \\s]+)([ \\s])",
-        to: "<a href='$1' target='_blank' data-preview=''>$1</a>$2"
+        from: '(https?:\\/\\/[^ \\s]+)([ \\s])',
+        to: '<a href="$1" target="_blank" data-preview="">$1</a>$2',
+        flags: 'g'
     },
     {
-        from:  "&gt;&gt;(.+)&lt;&lt;",
-        to: ">><code>$1</code><<"
+        from: '&gt;&gt;(.+)&lt;&lt;',
+        to: '>><code>$1</code><<',
+        flags: 'g'
     },
     {
-        from:  "(phpunit\s(.+))\n",
-        to: "<code>$1</code>\n"
+        from: "(phpunit +.+)\n",
+        to: "<code>$1</code>\n",
+        flags: 'g'
     },
     {
-        from:  "(features\/[A-z0-9\\/.]+:\\d+)",
-        to: "<code>$1</code>"
+        from: '(features\\/[\\w_\\/]+\\.feature:\\d+)',
+        to: '<code>$1</code>',
+        flags: 'g'
+    },
+    {
+        from: "(docker-compose run.+)\n",
+        to: "<code>$1</code>\n",
+        flags: 'g'
     }
+];
+
+const BUILDLOG_TRANSFORMS = [
+    {
+        from: '(features\/[\\w_\\/\\.: ]+)',
+        to: '<code>$1</code>',
+        flags: 'g'
+    },
 ];
 
 function preview_media(event) {
@@ -75,44 +92,76 @@ function preview_media(event) {
     }
 }
 
-function select_code(event)
-{
+function select_code(event) {
     let element = event.target;
     let range = document.createRange();
     range.selectNodeContents(element);
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(range);
+    if (document.execCommand('copy')) {
+        let copybox = document.createElement('div');
+        copybox.innerText = 'Copied!';
+        copybox.setAttribute('id', 'copybox');
+        document.body.appendChild(copybox);
+        let boundingClientRect = element.getBoundingClientRect();
+        copybox.style.top = boundingClientRect.top + boundingClientRect.height + window.scrollY + 2 + 'px';
+        copybox.style.left = (event.pageX - copybox.offsetWidth / 2) + 'px';
+        setTimeout(() => {
+            copybox.parentNode.removeChild(copybox);
+        }, 1000);
+    }
 }
 
-function transform(text)
-{
-    TRANSFORMATION_RULES.forEach((item)=>{
-        let rex = new RegExp(item.from, 'g');
+function transform(text, transformers) {
+    transformers.forEach((item) => {
+        let rex = new RegExp(item.from, item.flags);
         text = text.replace(rex, item.to);
     });
     return text;
 }
 
 function step() {
-    console.debug('better.js', 'step');
-    document.querySelectorAll('.fullStacktrace').forEach((item) => {
-        if (item.innerHTML.length > 0 && item.querySelector('.test') === null) {
-            item.innerHTML = transform(item.innerHTML);
-            // add an invisible span
-            let test = document.createElement('span');
-            test.setAttribute('class', 'test');
-            item.appendChild(test);
-        }
-    });
-    document.querySelectorAll('.fullStacktrace a').forEach((item) => {
-        item.addEventListener('click', preview_media, false);
-    });
-    document.querySelectorAll('.fullStacktrace code').forEach((item) => {
-        item.addEventListener('dblclick', select_code, false);
-    });
+    // test results
+    let stacktraces = document.querySelectorAll('.fullStacktrace');
+    if (stacktraces.length > 0) {
+        console.debug('better.js', 'step - stacktraces');
+        stacktraces.forEach((item) => {
+            if (item.innerHTML.length > 0 && item.querySelector('.test') === null) {
+                item.innerHTML = transform(item.innerHTML, TRANSFORMATION_RULES);
+                // add an invisible span
+                let test = document.createElement('span');
+                test.setAttribute('class', 'test');
+                item.appendChild(test);
+            }
+        });
+        document.querySelectorAll('.fullStacktrace a').forEach((item) => {
+            item.addEventListener('click', preview_media, false);
+        });
+        document.querySelectorAll('.fullStacktrace code').forEach((item) => {
+            item.addEventListener('dblclick', select_code, false);
+        });
+    }
+
+    // build log
+    let buildlogs = document.querySelectorAll('.mark');
+    if (buildlogs.length > 0) {
+        console.debug('better.js', 'step - buildlogs');
+        buildlogs.forEach((item) => {
+            if (item.innerHTML.length > 0 && item.querySelector('.test') === null) {
+                item.innerHTML = transform(item.innerHTML, BUILDLOG_TRANSFORMS);
+                // add an invisible span
+                let test = document.createElement('span');
+                test.setAttribute('class', 'test');
+                item.appendChild(test);
+            }
+        });
+        document.querySelectorAll('.mark code').forEach((item) => {
+            item.addEventListener('dblclick', select_code, false);
+        });
+    }
 }
 
-const nodes = ['#buildResults'];
+const nodes = ['#buildResults', '#buildLog'];
 
 nodes.every((node) => {
     // select the target node

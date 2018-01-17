@@ -21,3 +21,10 @@ div.preview {
 .preview > img {
     max-width: 90%;
 }
+
+#copybox {
+    position: absolute;
+    background: white;
+    border: 1px dotted #c0c0c0;
+    padding: 2px;
+}
