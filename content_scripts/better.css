@@ -24,7 +24,8 @@ div.preview {
 
 #copybox {
     position: absolute;
-    background: white;
+    background: #80C6FF;
+    color: white;
     border: 1px dotted #c0c0c0;
     padding: 2px;
 }
