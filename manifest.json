@@ -2,7 +2,7 @@
   "description": "View artifacts in teamcity reports",
   "manifest_version": 2,
   "name": "tc-better-reports",
-  "version": "0.0.10",
+  "version": "0.0.12",
   "homepage_url": "http://tech.badoo.com",
   "icons": {
     "512": "icons/report-512.png"
@@ -10,18 +10,15 @@
   "permissions": [
     "activeTab",
     "tabs",
-    "*://teamcity1.msk/*",
-    "*://teamcity2.mlan/*",
-    "*://bmaci.mlan/*",
-    "*://mainci.msk/*"
+    "<all_urls>"
   ],
   "content_scripts": [
     {
       "matches": [
-        "*://teamcity1.msk/*",
-        "*://teamcity2.mlan/*",
-        "*://bmaci.mlan/*",
-        "*://mainci.msk/*"
+        "<all_urls>"
+      ],
+      "include_globs": [
+        "*/viewLog.html*"
       ],
       "js": [
         "/content_scripts/better.js"

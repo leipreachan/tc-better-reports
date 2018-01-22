@@ -15,6 +15,11 @@ const TRANSFORMATION_RULES = [
         flags: 'g'
     },
     {
+        from: "(bundle +exec +.+)\n",
+        to: "<code>$1</code>\n",
+        flags: 'g'
+    },
+    {
         from: '(features\\/[\\w_\\/]+\\.feature:\\d+)',
         to: '<code>$1</code>',
         flags: 'g'
@@ -23,7 +28,12 @@ const TRANSFORMATION_RULES = [
         from: "(docker-compose run.+)\n",
         to: "<code>$1</code>\n",
         flags: 'g'
-    }
+    }/* , // I don't know if we should allow nested <code> blocks?
+    {
+        from: '(<code>.*)<code>(.*)</code>(.*</code>)',
+        to: '$1$2$3',
+        flags: 'g'
+    }*/
 ];
 
 const BUILDLOG_TRANSFORMS = [
