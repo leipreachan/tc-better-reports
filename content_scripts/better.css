@@ -10,7 +10,7 @@ code {
 }
 
 div.preview {
-    padding: 5px 0;
+    padding: 5px 5px;
 }
 
 .preview > img, .preview > video {
@@ -19,7 +19,7 @@ div.preview {
 }
 
 .preview > img {
-    max-width: 90%;
+    max-width: 90vw;
 }
 
 #copybox {

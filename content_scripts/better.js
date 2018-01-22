@@ -69,20 +69,36 @@ function preview_media(event) {
         case 'png':
             media = document.createElement('img');
             media.src = element.href;
-            media.title = 'Click to hide the preview';
-            preview_container.addEventListener('click', function () {
-                this.parentNode.removeChild(this);
-                element.dataset.preview = '';
+            media.style.maxHeight = '90vh';
+            media.addEventListener('load', () => {
+                if (window.innerHeight < media.height + 100) {
+                    media.title = 'Zoom in';
+                    media.style.cursor = 'zoom-in';
+                    preview_container.dataset.zoom = '';
+                    preview_container.addEventListener('click', () => {
+                        if (preview_container.dataset.zoom === 'true') {
+                            media.style.maxHeight = '90vh';
+                            media.style.cursor = 'zoom-in';
+                            preview_container.dataset.zoom = '';
+                            media.title = 'Zoom in';
+                        } else {
+                            media.style.removeProperty('max-height');
+                            media.style.cursor = 'zoom-out';
+                            preview_container.dataset.zoom = 'true';
+                            media.title = 'Zoom out';
+                        }
+                    });
+                }
             });
             break;
         case 'mp4':
             media = document.createElement('video');
-            let source = document.createElement('source');
-            media.setAttribute('controls', 'controls');
-            media.setAttribute('height', '500');
-            source.setAttribute('src', element.href);
-            source.setAttribute('kind', 'video/mp4');
-            media.appendChild(source);
+            media.setAttribute('id', 'video-preview');
+            media.setAttribute('controls', 'true');
+            media.setAttribute('preload', 'metadata');
+            media.setAttribute('playsinline', 'true');
+            media.setAttribute('height', '438px');
+            media.setAttribute('src', element.href);
             break;
     }
 
@@ -137,9 +153,6 @@ function step() {
         document.querySelectorAll('.fullStacktrace a').forEach((item) => {
             item.addEventListener('click', preview_media, false);
         });
-        document.querySelectorAll('.fullStacktrace code').forEach((item) => {
-            item.addEventListener('dblclick', select_code, false);
-        });
     }
 
     // build log
@@ -155,13 +168,15 @@ function step() {
                 item.appendChild(test);
             }
         });
-        document.querySelectorAll('.mark code').forEach((item) => {
-            item.addEventListener('dblclick', select_code, false);
-        });
     }
+
+    document.querySelectorAll('code').forEach((item) => {
+        item.addEventListener('dblclick', select_code, false)
+    });
+
 }
 
-const nodes = ['#buildResults', '#buildLog'];
+const nodes = ['#buildResults', '#buildLog', '#report_project12_Failed_tests_Tab'];
 
 nodes.every((node) => {
     // select the target node
@@ -179,10 +194,10 @@ nodes.every((node) => {
 
 // pass in the target node, as well as the observer options
     observer.observe(target, config);
-    console.debug('better.js', 'observe');
+    console.debug('better.js', `observe ${node}`);
 
     window.onunload = () => {
         observer.disconnect();
-        console.debug('better.js', 'disconnect');
+        console.debug('better.js', `observe ${node}`);
     };
 });
