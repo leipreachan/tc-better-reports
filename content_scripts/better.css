@@ -24,8 +24,10 @@ div.preview {
 
 #copybox {
     position: absolute;
+    font-family: Menlo, "Bitstream Vera Sans Mono", "Ubuntu Mono", "Courier New", Courier, consolas, "Liberation Mono", monospace;
     background: #80C6FF;
     color: white;
     border: 1px dotted #c0c0c0;
+    border-radius: 3px;
     padding: 2px;
 }

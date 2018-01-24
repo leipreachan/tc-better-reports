@@ -5,7 +5,7 @@ const TRANSFORMATION_RULES = [
         flags: 'g'
     },
     {
-        from: '&gt;&gt;(.+)&lt;&lt;',
+        from: '&gt;&gt;(.+?)&lt;&lt;',
         to: '>><code>$1</code><<',
         flags: 'g'
     },
@@ -28,12 +28,17 @@ const TRANSFORMATION_RULES = [
         from: "(docker-compose run.+)\n",
         to: "<code>$1</code>\n",
         flags: 'g'
-    }/* , // I don't know if we should allow nested <code> blocks?
+    },
     {
-        from: '(<code>.*)<code>(.*)</code>(.*</code>)',
-        to: '$1$2$3',
+        from: '(User: +)(\\d+)([ \\/]+)(\\w+@[\\w.]+)([ \\/]+)(\\w+)',
+        to: '$1<code>$2</code>$3<code>$4</code>$5<code>$6</code>',
         flags: 'g'
-    }*/
+    },
+    {
+        from: '(User +)(\\d+)',
+        to: '$1<code>$2</code>',
+        flags: 'g'
+    }
 ];
 
 const BUILDLOG_TRANSFORMS = [
