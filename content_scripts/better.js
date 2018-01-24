@@ -146,12 +146,12 @@ function transform(text, transformers) {
     return text;
 }
 
-function step() {
+function step(parentNode) {
     // test results
-    let stacktraces = document.querySelectorAll('.fullStacktrace');
+    let stacktraces = parentNode.querySelectorAll('.fullStacktrace');
     if (stacktraces.length > 0) {
-        console.debug('better.js', 'step - stacktraces');
-        stacktraces.forEach((item) => {
+        // console.debug('better.js', 'step - stacktraces');
+        stacktraces.forEach(async (item) => {
             if (item.innerHTML.length > 0 && item.querySelector('.test') === null) {
                 item.innerHTML = transform(item.innerHTML, TRANSFORMATION_RULES);
                 // add an invisible span
@@ -166,10 +166,10 @@ function step() {
     }
 
     // build log
-    let buildlogs = document.querySelectorAll('.mark');
+    let buildlogs = parentNode.querySelectorAll('.mark');
     if (buildlogs.length > 0) {
-        console.debug('better.js', 'step - buildlogs');
-        buildlogs.forEach((item) => {
+        // console.debug('better.js', `step - buildlogs ${buildlogs.length} nodes`);
+        buildlogs.forEach(async (item) => {
             if (item.innerHTML.length > 0 && item.querySelector('.test') === null) {
                 item.innerHTML = transform(item.innerHTML, BUILDLOG_TRANSFORMS);
                 // add an invisible span
@@ -180,10 +180,21 @@ function step() {
         });
     }
 
-    document.querySelectorAll('code').forEach((item) => {
+    parentNode.querySelectorAll('code').forEach(async (item) => {
         item.addEventListener('dblclick', select_code, false)
     });
 
+    resolve();
+}
+
+function resolve()
+{
+    console.log('resolved');
+}
+
+function reject()
+{
+    console.log('rejected');
 }
 
 const nodes = ['#buildResults', '#buildLog', '#report_project12_Failed_tests_Tab'];
@@ -195,7 +206,11 @@ nodes.every((node) => {
 // create an observer instance
     let observer = new MutationObserver((mutations) => {
         mutations.forEach(mutation => {
-            step();
+            if (!mutation.addedNodes) return;
+
+            mutation.addedNodes.forEach((node)=>{
+                step(node);
+            });
         });
     });
 
