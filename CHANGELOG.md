@@ -2,6 +2,10 @@
 
 ## Release notes
 
+### 0.0.13
+
+* minor improvements
+
 ### 0.0.12
 
 * less strict URL permissions (now it should work with any Teamcity)
