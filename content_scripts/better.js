@@ -35,7 +35,7 @@ const TRANSFORMATION_RULES = [
         flags: 'g'
     },
     {
-        from: '(User +)(\\d+)',
+        from: '(User:? +)(\\d+)',
         to: '$1<code>$2</code>',
         flags: 'g'
     }
@@ -152,19 +152,25 @@ function transform(text, transformers) {
 }
 
 function step() {
+
+    function canary_node(item) {
+        let test = document.createElement('span');
+        test.setAttribute('class', 'test');
+        item.appendChild(test);
+    }
+
+    function transform_block(item, rules) {
+        if (item.innerHTML.length > 0 && item.querySelector('.test') === null) {
+            item.innerHTML = transform(item.innerHTML, rules);
+            canary_node(item);
+        }
+    }
+
     // test results
     let stacktraces = document.querySelectorAll('.fullStacktrace');
     if (stacktraces.length > 0) {
         console.debug('better.js', 'step - stacktraces');
-        stacktraces.forEach((item) => {
-            if (item.innerHTML.length > 0 && item.querySelector('.test') === null) {
-                item.innerHTML = transform(item.innerHTML, TRANSFORMATION_RULES);
-                // add an invisible span
-                let test = document.createElement('span');
-                test.setAttribute('class', 'test');
-                item.appendChild(test);
-            }
-        });
+        stacktraces.forEach(item => transform_block(item, TRANSFORMATION_RULES));
         document.querySelectorAll('.fullStacktrace a').forEach((item) => {
             item.addEventListener('click', preview_media, false);
         });
@@ -174,24 +180,14 @@ function step() {
     let buildlogs = document.querySelectorAll('.mark');
     if (buildlogs.length > 0) {
         console.debug('better.js', 'step - buildlogs');
-        buildlogs.forEach((item) => {
-            if (item.innerHTML.length > 0 && item.querySelector('.test') === null) {
-                item.innerHTML = transform(item.innerHTML, BUILDLOG_TRANSFORMS);
-                // add an invisible span
-                let test = document.createElement('span');
-                test.setAttribute('class', 'test');
-                item.appendChild(test);
-            }
-        });
+        buildlogs.forEach(item => transform_block(item, BUILDLOG_TRANSFORMS));
     }
 
-    document.querySelectorAll('code').forEach((item) => {
-        item.addEventListener('dblclick', select_code, false)
-    });
+    document.querySelectorAll('code').forEach(item => item.addEventListener('dblclick', select_code, false));
 
 }
 
-const nodes = ['#buildResults', '#buildLog', '#report_project12_Failed_tests_Tab'];
+const nodes = ['#buildResults', '#buildLog'];
 
 nodes.every((node) => {
     // select the target node
@@ -199,9 +195,7 @@ nodes.every((node) => {
 
 // create an observer instance
     let observer = new MutationObserver((mutations) => {
-        mutations.forEach(mutation => {
-            step();
-        });
+        mutations.forEach(mutation => step());
     });
 
 // configuration of the observer:
