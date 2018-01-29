@@ -1,7 +1,7 @@
 const TRANSFORMATION_RULES = [
     {
-        from: '(https?:\\/\\/[^ \\s]+)([ \\s])',
-        to: '<a href="$1" target="_blank" data-preview="" class="betterpreview">$1</a>$2',
+        from: '(https?:\\/\\/[^ \\s]+(\\w{3}))([ \\s])',
+        to: '<a href="$1" target="_blank" data-preview="" data-previewtype="$2" class="betterpreview">$1</a>$3',
         flags: 'g'
     },
     {
@@ -51,9 +51,15 @@ const BUILDLOG_TRANSFORMS = [
 
 const CANARY = 'canary';
 
+function get_media_type(element)
+{
+    return element.dataset.previewtype;
+}
+
 function preview_media(event) {
     const element = event.target;
-    const type = element.href.substr(element.href.lastIndexOf('.') + 1).toLowerCase();
+    console.debug(`better.js: preview-media`);
+    const type = get_media_type(element);
 
     function create_preview_container(opener) {
         let preview_container = document.createElement('div');
