@@ -2,6 +2,10 @@
 
 ## Release notes
 
+### 0.0.15
+
+* technical debts. Got rid of querySelectorAll => the extension should be a bit faster
+
 ### 0.0.14
 
 * technical debts
@@ -34,7 +38,7 @@
 ### 0.0.7
 
 *  better styling
- 
+
 ### 0.0.6
 
 * more parsing rules added
