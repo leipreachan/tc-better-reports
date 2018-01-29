@@ -1,7 +1,7 @@
 const TRANSFORMATION_RULES = [
     {
         from: '(https?:\\/\\/[^ \\s]+)([ \\s])',
-        to: '<a href="$1" target="_blank" data-preview="">$1</a>$2',
+        to: '<a href="$1" target="_blank" data-preview="" class="betterpreview">$1</a>$2',
         flags: 'g'
     },
     {
@@ -48,6 +48,8 @@ const BUILDLOG_TRANSFORMS = [
         flags: 'g'
     },
 ];
+
+const CANARY = 'canary';
 
 function preview_media(event) {
     const element = event.target;
@@ -151,51 +153,55 @@ function transform(text, transformers) {
     return text;
 }
 
-function step() {
+function step(transformer_class, rules, customizer) {
 
     function canary_node(item) {
         let test = document.createElement('span');
-        test.setAttribute('class', 'test');
+        test.setAttribute('class', CANARY);
         item.appendChild(test);
     }
 
     function transform_block(item, rules) {
-        if (item.innerHTML.length > 0 && item.querySelector('.test') === null) {
+        if (item.innerHTML.length > 0 && item.getElementsByClassName(CANARY).length === 0) {
             item.innerHTML = transform(item.innerHTML, rules);
             canary_node(item);
         }
     }
 
-    // test results
-    let stacktraces = document.querySelectorAll('.fullStacktrace');
-    if (stacktraces.length > 0) {
-        console.debug('better.js', 'step - stacktraces');
-        stacktraces.forEach(item => transform_block(item, TRANSFORMATION_RULES));
-        document.querySelectorAll('.fullStacktrace a').forEach((item) => {
-            item.addEventListener('click', preview_media, false);
-        });
+    let blocks = document.getElementsByClassName(transformer_class);
+    if (blocks.length > 0) {
+        Array.from(blocks).forEach(item => transform_block(item, rules));
+        customizer();
     }
 
-    // build log
-    let buildlogs = document.querySelectorAll('.mark');
-    if (buildlogs.length > 0) {
-        console.debug('better.js', 'step - buildlogs');
-        buildlogs.forEach(item => transform_block(item, BUILDLOG_TRANSFORMS));
-    }
-
-    document.querySelectorAll('code').forEach(item => item.addEventListener('dblclick', select_code, false));
-
+    Array.from(document.getElementsByTagName('code')).forEach(item => item.addEventListener('dblclick', select_code, false));
 }
 
-const nodes = ['#buildResults', '#buildLog'];
+const nodes = [
+    {
+        id: 'buildResults',
+        transformer_class: 'fullStacktrace',
+        rule_set: TRANSFORMATION_RULES,
+        customizer: () => {
+            Array.from(document.getElementsByClassName('betterpreview')).forEach((item) => {
+                item.addEventListener('click', preview_media, false);
+            });
+        }
+    },
+    {
+        id: 'buildLog',
+        transformer_class: 'mark',
+        rule_set: BUILDLOG_TRANSFORMS,
+        customizer: null
+    }];
 
 nodes.every((node) => {
     // select the target node
-    let target = document.querySelector(node);
+    let target = document.getElementById(node.id);
 
 // create an observer instance
     let observer = new MutationObserver((mutations) => {
-        mutations.forEach(mutation => step());
+        mutations.forEach(mutation => step(node.transformer_class, node.rule_set, node.customizer));
     });
 
 // configuration of the observer:
@@ -203,10 +209,10 @@ nodes.every((node) => {
 
 // pass in the target node, as well as the observer options
     observer.observe(target, config);
-    console.debug('better.js', `observe ${node}`);
+    console.debug(`better.js: observe ${node.id}`);
 
     window.onunload = () => {
         observer.disconnect();
-        console.debug('better.js', `observe ${node}`);
+        console.debug(`better.js: observe ${node.id}`);
     };
 });
