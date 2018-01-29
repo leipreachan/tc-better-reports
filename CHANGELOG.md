@@ -2,6 +2,10 @@
 
 ## Release notes
 
+### 0.0.16
+
+* links with preview option have a little bit of decoration
+
 ### 0.0.15
 
 * technical debts. Got rid of querySelectorAll => the extension should be a bit faster
