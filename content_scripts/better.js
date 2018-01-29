@@ -1,7 +1,8 @@
 const TRANSFORMATION_RULES = [
     {
-        from: '(https?:\\/\\/[^ \\s]+(\\w{3}))([ \\s])',
-        to: '<a href="$1" target="_blank" data-preview="" data-previewtype="$2" class="betterpreview">$1</a>$3',
+        // language=JSRegexp
+        from: '(https?:\\/\\/\\S+(([a-z]{3})|([^\\s]{3})))(\\s+?)',
+        to: '<a href="$1" target="_blank" data-preview="" data-previewtype="$3" class="betterpreview">$1</a>$5',
         flags: 'g'
     },
     {
@@ -20,6 +21,7 @@ const TRANSFORMATION_RULES = [
         flags: 'g'
     },
     {
+        // language=JSRegexp
         from: '(features\\/[\\w_\\/]+\\.feature:\\d+)',
         to: '<code>$1</code>',
         flags: 'g'
@@ -30,6 +32,7 @@ const TRANSFORMATION_RULES = [
         flags: 'g'
     },
     {
+        // language=JSRegexp
         from: '(User: +)(\\d+)([ \\/]+)(\\w+@[\\w.]+)([ \\/]+)(\\w+)',
         to: '$1<code>$2</code>$3<code>$4</code>$5<code>$6</code>',
         flags: 'g'

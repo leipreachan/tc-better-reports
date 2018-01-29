@@ -2,7 +2,7 @@
 
 ## Release notes
 
-### 0.0.16
+### 0.0.17
 
 * links with preview option have a little bit of decoration
 
