@@ -65,31 +65,41 @@ function get_media_type(element)
 }
 
 function preview_media(event) {
+    let preview_container, media;
     const element = event.target;
-    console.debug(`better.js: preview-media`);
     const type = get_media_type(element);
-
-    function create_preview_container(opener) {
+    const create_preview_container = (opener) => {
         let preview_container = document.createElement('div');
         preview_container.setAttribute('class', 'preview');
         let id = (new Date()).toJSON();
         preview_container.setAttribute('id', id);
         opener.previewId = id;
         return preview_container;
-    }
+    };
 
-    function close_preview_container(opener) {
-        let preview_container = document.getElementById(element.previewId);
+    const close_preview_container = (opener, preview_container) => {
         preview_container.parentNode.removeChild(preview_container);
         opener.previewId = '';
         opener.title = '';
-    }
+    };
 
-    let preview_container, media;
+    const toggle_image_zoom = (preview_container, image) => {
+        if (preview_container.zoomed === true) {
+            image.style.maxHeight = '90vh';
+            image.style.cursor = 'zoom-in';
+            image.title = 'Zoom in';
+        } else {
+            image.style.removeProperty('max-height');
+            image.style.cursor = 'zoom-out';
+            image.title = 'Zoom out';
+        }
+        preview_container.zoomed = !preview_container.zoomed;
+    };
+
     if (type === 'png' || type === 'mp4') {
         event.preventDefault();
         if (element.previewId !== undefined && element.previewId.length > 0) {
-            close_preview_container(element);
+            close_preview_container(element, document.getElementById(element.previewId));
         } else {
             preview_container = create_preview_container(element);
             element.title = 'Click to hide the preview';
@@ -104,20 +114,8 @@ function preview_media(event) {
             media.addEventListener('load', () => {
                 if (window.innerHeight < media.height + 100) {
                     media.title = 'Zoom in';
-                    media.style.cursor = 'zoom-in';
                     preview_container.zoomed = false;
-                    preview_container.addEventListener('click', () => {
-                        if (preview_container.zoomed === true) {
-                            media.style.maxHeight = '90vh';
-                            media.style.cursor = 'zoom-in';
-                            media.title = 'Zoom in';
-                        } else {
-                            media.style.removeProperty('max-height');
-                            media.style.cursor = 'zoom-out';
-                            media.title = 'Zoom out';
-                        }
-                        preview_container.zoomed = !preview_container.zoomed;
-                    });
+                    preview_container.addEventListener('click', () => toggle_image_zoom(preview_container, media));
                 }
             });
             break;
