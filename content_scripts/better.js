@@ -57,7 +57,11 @@ const BUILDLOG_TRANSFORMS = [
     },
 ];
 
-const CANARY = 'canary';
+const CANARY = 'canary',
+    MEDIA_PNG = 'png',
+    MEDIA_MP4 = 'mp4';
+
+const DEFAULT_MAX_HEIGHT = '90vh';
 
 function get_media_type(element)
 {
@@ -85,7 +89,7 @@ function preview_media(event) {
 
     const toggle_image_zoom = (preview_container, image) => {
         if (preview_container.zoomed === true) {
-            image.style.maxHeight = '90vh';
+            image.style.maxHeight = DEFAULT_MAX_HEIGHT;
             image.style.cursor = 'zoom-in';
             image.title = 'Zoom in';
         } else {
@@ -96,43 +100,47 @@ function preview_media(event) {
         preview_container.zoomed = !preview_container.zoomed;
     };
 
-    if (type === 'png' || type === 'mp4') {
+    const create_media = (type, preview_container) => {
+        switch (type) {
+            case MEDIA_PNG:
+                media = document.createElement('img');
+                media.src = element.href;
+                media.style.maxHeight = DEFAULT_MAX_HEIGHT;
+                media.addEventListener('load', () => {
+                    if (window.innerHeight < media.height + 100) {
+                        media.title = 'Zoom in';
+                        preview_container.zoomed = false;
+                        preview_container.addEventListener('click', () => toggle_image_zoom(preview_container, media));
+                    }
+                });
+                break;
+            case MEDIA_MP4:
+                media = document.createElement('video');
+                media.setAttribute('id', 'video-preview');
+                media.setAttribute('controls', 'true');
+                media.setAttribute('preload', 'metadata');
+                media.setAttribute('playsinline', 'true');
+                media.setAttribute('height', '438px');
+                media.setAttribute('src', element.href);
+                break;
+        }
+    };
+
+    if (type === MEDIA_PNG || type === MEDIA_MP4) {
         event.preventDefault();
         if (element.previewId !== undefined && element.previewId.length > 0) {
             close_preview_container(element, document.getElementById(element.previewId));
         } else {
             preview_container = create_preview_container(element);
             element.title = 'Click to hide the preview';
+
+            create_media(type, preview_container);
+
+            if (preview_container && media) {
+                preview_container.appendChild(media);
+                element.parentNode.insertBefore(preview_container, element.nextSibling);
+            }
         }
-    }
-
-    switch (type) {
-        case 'png':
-            media = document.createElement('img');
-            media.src = element.href;
-            media.style.maxHeight = '90vh';
-            media.addEventListener('load', () => {
-                if (window.innerHeight < media.height + 100) {
-                    media.title = 'Zoom in';
-                    preview_container.zoomed = false;
-                    preview_container.addEventListener('click', () => toggle_image_zoom(preview_container, media));
-                }
-            });
-            break;
-        case 'mp4':
-            media = document.createElement('video');
-            media.setAttribute('id', 'video-preview');
-            media.setAttribute('controls', 'true');
-            media.setAttribute('preload', 'metadata');
-            media.setAttribute('playsinline', 'true');
-            media.setAttribute('height', '438px');
-            media.setAttribute('src', element.href);
-            break;
-    }
-
-    if (preview_container && media) {
-        preview_container.appendChild(media);
-        element.parentNode.insertBefore(preview_container, element.nextSibling);
     }
 }
 
