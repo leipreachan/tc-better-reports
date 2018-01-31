@@ -62,13 +62,11 @@ const CANARY = 'canary',
 
 const DEFAULT_MAX_HEIGHT = '90vh';
 
-function get_media_type(element)
-{
+function get_media_type(element) {
     return element.dataset.previewtype;
 }
 
 function preview_media(event) {
-    let preview_container, media;
     const element = event.target;
     const type = get_media_type(element);
     const create_preview_container = (opener) => {
@@ -116,19 +114,17 @@ function preview_media(event) {
                 media.setAttribute('src', element.href);
                 break;
         }
+        return media;
     };
 
     if (type === MEDIA_PNG || type === MEDIA_MP4) {
         event.preventDefault();
         if (element.previewId === undefined) {
             const preview_container = create_preview_container(element);
+            const media = create_media(type, preview_container);
 
-            create_media(type, preview_container);
-
-            if (preview_container && media) {
-                preview_container.appendChild(media);
-                element.parentNode.insertBefore(preview_container, element.nextSibling);
-            }
+            preview_container.appendChild(media);
+            element.parentNode.insertBefore(preview_container, element.nextSibling);
             element.previewId = preview_container.id;
             element.previewOpened = true;
         } else {
@@ -165,7 +161,7 @@ function select_code(event) {
     }
 }
 
-function transform(text, transformers) {
+function transform_node_text(text, transformers) {
     transformers.forEach((item) => {
         let rex = new RegExp(item.from, item.flags);
         text = text.replace(rex, item.to);
@@ -173,28 +169,32 @@ function transform(text, transformers) {
     return text;
 }
 
-function step(transformer_class, rules, customizer) {
+function transform_mutated_nodes(transformer_class, rules, customizer) {
 
-    function canary_node(item) {
+    const insert_canary_node = (item) => {
         let test = document.createElement('span');
         test.setAttribute('class', CANARY);
         item.appendChild(test);
-    }
+    };
 
-    function transform_block(item, rules) {
+    const transform_block = (item, rules) => {
         if (item.innerHTML.length > 0 && item.getElementsByClassName(CANARY).length === 0) {
-            item.innerHTML = transform(item.innerHTML, rules);
-            canary_node(item);
+            item.innerHTML = transform_node_text(item.innerHTML, rules);
+            insert_canary_node(item);
         }
-    }
+    };
 
     let blocks = document.getElementsByClassName(transformer_class);
     if (blocks.length > 0) {
-        Array.from(blocks).forEach(item => transform_block(item, rules));
+        Array.from(blocks).forEach((item) => {
+            transform_block(item, rules)
+        });
         customizer();
     }
 
-    Array.from(document.getElementsByTagName('code')).forEach(item => item.addEventListener('dblclick', select_code, false));
+    Array.from(document.getElementsByTagName('code')).forEach((item) => {
+        item.addEventListener('dblclick', select_code, false)
+    });
 }
 
 const nodes = [
@@ -221,7 +221,8 @@ nodes.every((node) => {
 
 // create an observer instance
     let observer = new MutationObserver((mutations) => {
-        mutations.forEach(mutation => step(node.transformer_class, node.rule_set, node.customizer));
+        mutations.forEach((mutation) => {
+            transform_mutated_nodes(node.transformer_class, node.rule_set, node.customizer)});
     });
 
 // configuration of the observer:
