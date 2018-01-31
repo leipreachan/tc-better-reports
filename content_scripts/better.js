@@ -1,4 +1,3 @@
-// TODO: b) re-write to toggling!
 // TODO: c) create preview node on mouse hover event, but toggle it on click
 // TODO: c) add sliding
 
@@ -77,14 +76,7 @@ function preview_media(event) {
         preview_container.setAttribute('class', 'preview');
         let id = (new Date()).toJSON();
         preview_container.setAttribute('id', id);
-        opener.previewId = id;
         return preview_container;
-    };
-
-    const close_preview_container = (opener, preview_container) => {
-        preview_container.parentNode.removeChild(preview_container);
-        opener.previewId = '';
-        opener.title = '';
     };
 
     const toggle_image_zoom = (preview_container, image) => {
@@ -128,11 +120,8 @@ function preview_media(event) {
 
     if (type === MEDIA_PNG || type === MEDIA_MP4) {
         event.preventDefault();
-        if (element.previewId !== undefined && element.previewId.length > 0) {
-            close_preview_container(element, document.getElementById(element.previewId));
-        } else {
-            preview_container = create_preview_container(element);
-            element.title = 'Click to hide the preview';
+        if (element.previewId === undefined) {
+            const preview_container = create_preview_container(element);
 
             create_media(type, preview_container);
 
@@ -140,6 +129,18 @@ function preview_media(event) {
                 preview_container.appendChild(media);
                 element.parentNode.insertBefore(preview_container, element.nextSibling);
             }
+            element.previewId = preview_container.id;
+            element.previewOpened = true;
+        } else {
+            const preview_container = document.getElementById(element.previewId);
+            if (element.previewOpened) {
+                preview_container.style.display = 'none';
+                element.title = '';
+            } else {
+                preview_container.style.display = 'block';
+                element.title = 'Click to hide the preview';
+            }
+            element.previewOpened = !element.previewOpened;
         }
     }
 }
