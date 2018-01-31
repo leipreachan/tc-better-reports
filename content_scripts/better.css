@@ -19,6 +19,7 @@ div.preview {
 }
 
 .preview > img {
+    cursor: zoom-in;
     max-width: 90vw;
 }
 
