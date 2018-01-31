@@ -1,8 +1,13 @@
+// TODO: b) re-write to toggling!
+// TODO: c) create preview node on mouse hover event, but toggle it on click
+// TODO: c) add sliding
+
+
 const TRANSFORMATION_RULES = [
     {
         // language=JSRegexp
         from: '(https?:\\/\\/\\S+(([a-z]{3})|([^\\s]{3})))(\\s+?)',
-        to: '<a href="$1" target="_blank" data-preview="" data-previewtype="$3" class="betterpreview">$1</a>$5',
+        to: '<a href="$1" target="_blank" data-previewtype="$3" class="betterpreview">$1</a>$5',
         flags: 'g'
     },
     {
@@ -69,21 +74,21 @@ function preview_media(event) {
         preview_container.setAttribute('class', 'preview');
         let id = (new Date()).toJSON();
         preview_container.setAttribute('id', id);
-        opener.dataset.preview = id;
+        opener.previewId = id;
         return preview_container;
     }
 
     function close_preview_container(opener) {
-        let preview_container = document.getElementById(element.dataset.preview);
+        let preview_container = document.getElementById(element.previewId);
         preview_container.parentNode.removeChild(preview_container);
-        opener.dataset.preview = '';
+        opener.previewId = '';
         opener.title = '';
     }
 
     let preview_container, media;
     if (type === 'png' || type === 'mp4') {
         event.preventDefault();
-        if (element.dataset.preview.length > 0) {
+        if (element.previewId !== undefined && element.previewId.length > 0) {
             close_preview_container(element);
         } else {
             preview_container = create_preview_container(element);
@@ -100,19 +105,18 @@ function preview_media(event) {
                 if (window.innerHeight < media.height + 100) {
                     media.title = 'Zoom in';
                     media.style.cursor = 'zoom-in';
-                    preview_container.dataset.zoom = '';
+                    preview_container.zoomed = false;
                     preview_container.addEventListener('click', () => {
-                        if (preview_container.dataset.zoom === 'true') {
+                        if (preview_container.zoomed === true) {
                             media.style.maxHeight = '90vh';
                             media.style.cursor = 'zoom-in';
-                            preview_container.dataset.zoom = '';
                             media.title = 'Zoom in';
                         } else {
                             media.style.removeProperty('max-height');
                             media.style.cursor = 'zoom-out';
-                            preview_container.dataset.zoom = 'true';
                             media.title = 'Zoom out';
                         }
+                        preview_container.zoomed = !preview_container.zoomed;
                     });
                 }
             });

@@ -23,7 +23,7 @@ div.preview {
 }
 
 [data-previewtype=png], [data-previewtype=mp4] {
-    border-bottom: 1px dotted;
+    border-bottom: 1px dashed;
 }
 
 [data-previewtype]:hover {
