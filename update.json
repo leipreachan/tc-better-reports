@@ -1,0 +1,12 @@
+{
+    "addons": {
+        "tc-better-reports@badoo.com": {
+            "updates": [
+                {
+                    "version": "0.0.19",
+                    "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.0.19/tc_better_reports-0.0.19-an.fx.xpi"
+                }
+            ]
+        }
+	}
+}
