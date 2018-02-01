@@ -2,6 +2,13 @@
 
 ## Release notes
 
+### 0.0.18
+
+* memory leak fixed
+* preview is loaded on mouseover / focus events. Basically, it's a preloading
+* minor css tweaks
+* technical debts
+
 ### 0.0.17
 
 * links with preview option have a little bit of decoration
