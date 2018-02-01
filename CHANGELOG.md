@@ -2,6 +2,10 @@
 
 ## Release notes
 
+### known issues
+
+* something like `>>https://link<<` is parsed in a wrong way:(
+
 ### 0.0.18
 
 * memory leak fixed
