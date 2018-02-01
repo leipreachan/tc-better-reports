@@ -1,3 +1,6 @@
+/// TODO: to fix incorrect nesting
+// Element >>http://web:web@gridrouter.d3:44441/wd/hub/session/b0721b41341782bfcff2507e2e5894a6d1e09d9e-ac15-41ea-905e-d9bba244fd20/element/44<< is not clickable at point (631.5, 584.0333251953125). Other element would receive the click: <div id="disable_ovl"></div>
+
 // TODO: c) add sliding
 // TODO: d) add options for preloading
 
@@ -5,7 +8,7 @@
 const TRANSFORMATION_RULES = [
     {
         // language=JSRegexp
-        from: '(https?:\\/\\/\\S+(([a-z]{3})|([^\\s]{3})))(\\s+?)',
+        from: '(https?:\\/\\/(?:[-\\w:\\@.]+)+(?::\\d+)?(?:/(?:[\\w#/_.!:-]*(?:\\?\\S+)?)?)?(([a-z0-9]{3})|([^\\s]{3})))(\\s+?)',
         to: '<a href="$1" target="_blank" data-previewtype="$3" class="betterpreview">$1</a>$5',
         flags: 'g'
     },

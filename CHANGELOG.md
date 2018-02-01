@@ -6,7 +6,11 @@
 
 * something like `>>https://link<<` is parsed in a wrong way:(
 
-### 0.0.18
+### 0.0.19 [stable]
+
+* stricter links validation
+
+### 0.0.18 [unstable]
 
 * memory leak fixed
 * preview is loaded on mouseover / focus events. Basically, it's a preloading
