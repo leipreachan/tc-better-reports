@@ -2,8 +2,8 @@
   "description": "View artifacts in teamcity reports",
   "manifest_version": 2,
   "name": "tc-better-reports",
-  "version": "0.0.18.3",
-  "version_name": "0.0.18 beta 3",
+  "version": "0.0.19",
+  "version_name": "0.0.19 stable",
   "homepage_url": "http://tech.badoo.com",
   "icons": {
     "128": "icons/report-128.png"

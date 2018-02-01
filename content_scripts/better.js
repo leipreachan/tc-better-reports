@@ -63,7 +63,7 @@ const CANARY = 'canary',
     MEDIA_PNG = 'png',
     MEDIA_MP4 = 'mp4';
 
-const DEFAULT_MAX_HEIGHT = '90vh';
+const DEFAULT_MAX_HEIGHT = '80vh';
 
 function get_media_type(element) {
     return element.dataset.previewtype;
@@ -100,7 +100,7 @@ function create_media_preview(event) {
                 media.src = src;
                 media.style.maxHeight = DEFAULT_MAX_HEIGHT;
                 media.addEventListener('load', () => {
-                    if (window.innerHeight < media.height + 100) {
+                    if (window.innerHeight < media.height + 200) {
                         media.title = 'Zoom in';
                         preview_container.zoomed = false;
                         preview_container.addEventListener('click', () => toggle_image_zoom(preview_container, media));
