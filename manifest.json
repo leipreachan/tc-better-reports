@@ -2,8 +2,8 @@
   "description": "View artifacts in teamcity reports",
   "manifest_version": 2,
   "name": "tc-better-reports",
-  "version": "0.0.19",
-  "version_name": "0.0.19 stable",
+  "version": "0.0.19.1",
+  "version_name": "0.0.19.1 github",
   "homepage_url": "http://tech.badoo.com",
   "icons": {
     "128": "icons/report-128.png"
@@ -33,7 +33,7 @@
   "applications": {
     "gecko": {
       "id": "tc-better-reports@badoo.com",
-      "update_url": "https://my.me2.ru/updates.json"
+      "update_url": "https://leipreachan.github.io/tc-better-reports/updates.json"
     }
   }
 }
