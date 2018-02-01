@@ -1,4 +1,5 @@
 // TODO: c) add sliding
+// TODO: d) add options for preloading
 
 
 const TRANSFORMATION_RULES = [
