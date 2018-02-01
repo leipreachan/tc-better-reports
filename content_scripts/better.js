@@ -1,4 +1,3 @@
-// TODO: c) create preview node on mouse hover event, but toggle it on click
 // TODO: c) add sliding
 
 
@@ -66,9 +65,9 @@ function get_media_type(element) {
     return element.dataset.previewtype;
 }
 
-function preview_media(event) {
-    const element = event.target;
-    const type = get_media_type(element);
+function create_media_preview(event) {
+    const target = event.target;
+    const type = get_media_type(target);
     const create_preview_container = (opener) => {
         let preview_container = document.createElement('div');
         preview_container.setAttribute('class', 'preview');
@@ -90,11 +89,11 @@ function preview_media(event) {
         preview_container.zoomed = !preview_container.zoomed;
     };
 
-    const create_media = (type, preview_container) => {
+    const create_media = (type, preview_container, src) => {
         switch (type) {
             case MEDIA_PNG:
                 media = document.createElement('img');
-                media.src = element.href;
+                media.src = src;
                 media.style.maxHeight = DEFAULT_MAX_HEIGHT;
                 media.addEventListener('load', () => {
                     if (window.innerHeight < media.height + 100) {
@@ -111,48 +110,56 @@ function preview_media(event) {
                 media.setAttribute('preload', 'metadata');
                 media.setAttribute('playsinline', 'true');
                 media.setAttribute('height', '438px');
-                media.setAttribute('src', element.href);
+                media.setAttribute('src', src);
                 break;
         }
         return media;
     };
 
-    if (type === MEDIA_PNG || type === MEDIA_MP4) {
-        event.preventDefault();
-        if (element.previewId === undefined) {
-            const preview_container = create_preview_container(element);
-            const media = create_media(type, preview_container);
+    if ((type === MEDIA_PNG || type === MEDIA_MP4) && target.previewId === undefined) {
+        console.debug('better.js: create preview');
+        const preview_container = create_preview_container(target);
+        const media = create_media(type, preview_container, target.href);
 
-            preview_container.appendChild(media);
-            element.parentNode.insertBefore(preview_container, element.nextSibling);
-            element.previewId = preview_container.id;
-            element.previewOpened = true;
+        preview_container.appendChild(media);
+        target.parentNode.insertBefore(preview_container, target.nextSibling);
+        target.previewId = preview_container.id;
+        target.previewOpened = false;
+    }
+}
+
+function toggle_media_preview(event) {
+    console.debug('better.js: toggle preview');
+    const target = event.target;
+    const type = get_media_type(target);
+    const preview_container = document.getElementById(target.previewId);
+
+    if ((type === MEDIA_PNG || type === MEDIA_MP4) && target.previewId !== undefined) {
+
+        event.preventDefault();
+        if (target.previewOpened) {
+            preview_container.style.display = 'none';
+            target.title = '';
         } else {
-            const preview_container = document.getElementById(element.previewId);
-            if (element.previewOpened) {
-                preview_container.style.display = 'none';
-                element.title = '';
-            } else {
-                preview_container.style.display = 'block';
-                element.title = 'Click to hide the preview';
-            }
-            element.previewOpened = !element.previewOpened;
+            preview_container.style.display = 'block';
+            target.title = 'Click to hide the preview';
         }
+        target.previewOpened = !target.previewOpened;
     }
 }
 
 function select_code(event) {
-    let element = event.target;
-    let range = document.createRange();
-    range.selectNodeContents(element);
+    const target = event.target;
+    const range = document.createRange();
+    range.selectNodeContents(target);
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(range);
     if (document.execCommand('copy')) {
-        let copybox = document.createElement('div');
+        const copybox = document.createElement('div');
         copybox.innerText = 'Copied!';
         copybox.setAttribute('id', 'copybox');
         document.body.appendChild(copybox);
-        let boundingClientRect = element.getBoundingClientRect();
+        let boundingClientRect = target.getBoundingClientRect();
         copybox.style.top = boundingClientRect.top + boundingClientRect.height + window.scrollY + 2 + 'px';
         copybox.style.left = (event.pageX - copybox.offsetWidth / 2) + 'px';
         setTimeout(() => {
@@ -172,7 +179,7 @@ function transform_node_text(text, transformers) {
 function transform_mutated_nodes(transformer_class, rules, customizer) {
 
     const insert_canary_node = (item) => {
-        let test = document.createElement('span');
+        const test = document.createElement('span');
         test.setAttribute('class', CANARY);
         item.appendChild(test);
     };
@@ -204,7 +211,9 @@ const nodes = [
         rule_set: TRANSFORMATION_RULES,
         customizer: () => {
             Array.from(document.getElementsByClassName('betterpreview')).forEach((item) => {
-                item.addEventListener('click', preview_media, false);
+                item.addEventListener('mouseover', create_media_preview, false);
+                item.addEventListener('focus', create_media_preview, false);
+                item.addEventListener('click', toggle_media_preview, false);
             });
         }
     },
@@ -217,12 +226,13 @@ const nodes = [
 
 nodes.every((node) => {
     // select the target node
-    let target = document.getElementById(node.id);
+    const target = document.getElementById(node.id);
 
 // create an observer instance
     let observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
-            transform_mutated_nodes(node.transformer_class, node.rule_set, node.customizer)});
+            transform_mutated_nodes(node.transformer_class, node.rule_set, node.customizer)
+        });
     });
 
 // configuration of the observer:
