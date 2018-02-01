@@ -11,6 +11,7 @@ code {
 
 div.preview {
     padding: 5px 5px;
+    display: none;
 }
 
 .preview > img, .preview > video {
