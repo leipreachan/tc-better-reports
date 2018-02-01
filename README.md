@@ -13,7 +13,7 @@
   * `User:? \d+` is transformed to `User:? <code>$1</code>`
   * [chrome://extensions/](chrome://extensions/) => Developer mode (v) => Update extensions now
 
-[Firefox](https://github.com/leipreachan/tc-better-reports/releases) |
+[Firefox](https://github.com/leipreachan/tc-better-reports/releases/latest) |
 [Google Chrome](https://chrome.google.com/webstore/detail/tc-better-reports/idddfkaoefamlflojibpncamdcbnddpk)
 
 [Changelog](CHANGELOG.md)
