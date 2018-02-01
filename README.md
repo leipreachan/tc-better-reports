@@ -15,3 +15,5 @@
 
 [Firefox](https://github.com/leipreachan/tc-better-reports/releases) |
 [Google Chrome](https://chrome.google.com/webstore/detail/tc-better-reports/idddfkaoefamlflojibpncamdcbnddpk)
+
+[Changelog](CHANGELOG.md)
