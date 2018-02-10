@@ -1,3 +1,6 @@
 .idea/*
 .editorconfig
 .web-extension-id
+_site/*
+Gemfile
+Gemfile.lock
