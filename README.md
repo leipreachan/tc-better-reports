@@ -16,3 +16,6 @@
 Firefox (unlisted, I'll send you a link on request) |
 [Google Chrome](https://chrome.google.com/webstore/detail/tc-better-reports/idddfkaoefamlflojibpncamdcbnddpk)
 
+--
+
+yeah, I know the code is bad :)
