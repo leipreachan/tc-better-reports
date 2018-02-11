@@ -1,11 +1,11 @@
 const {OVERVIEW_TRANSFORMS} = require('../content_scripts/better');
 let assert = require('assert');
-describe('Validate RegExp for link matching', () => {
+describe('Assert RegExp for link matching', () => {
     it('RegExp for link matching is defined', () => {
         assert.ok(OVERVIEW_TRANSFORMS[0]['from']);
     });
 
-    describe('Validate RegExp matches different correct variants', () => {
+    describe('Assert RegExp matches valid links', () => {
 
         let data = [
             {
@@ -88,7 +88,7 @@ describe('Validate RegExp for link matching', () => {
         });
     });
 
-    describe('Validate RegExp DOES NOT match these variants', () => {
+    describe('Assert RegExp DOES NOT match invalid links', () => {
         let data = [
             {
                 input: ' https://-.d3 www '

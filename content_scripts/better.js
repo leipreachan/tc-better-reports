@@ -200,7 +200,9 @@ function transform_mutated_nodes(transformer_class, rules, customizer) {
         Array.from(blocks).forEach((item) => {
             transform_block(item, rules)
         });
-        customizer();
+        if (typeof customizer === "function") {
+            customizer();
+        }
     }
 
     Array.from(document.getElementsByTagName('code')).forEach((item) => {
@@ -224,6 +226,7 @@ if (typeof window !== "object") {
 
     const nodes = [
         {
+            address_pattern: 'tab=buildResultsDiv',
             id: 'buildResults',
             transformer_class: 'fullStacktrace',
             rule_set: OVERVIEW_TRANSFORMS,
@@ -231,7 +234,7 @@ if (typeof window !== "object") {
                 Array.from(document.getElementsByClassName(PREVIEW_CLASS)).forEach((item) => {
                     const href = item.getAttribute('href');
                     const matcher = href.match(/\.(\w{1,4})$/);
-                    if (matcher && undefined!==matcher[1]) {
+                    if (matcher && undefined !== matcher[1]) {
                         item.dataset.previewtype = matcher[1];
                         item.addEventListener('mouseover', create_media_preview, false);
                         item.addEventListener('focus', create_media_preview, false);
@@ -242,6 +245,7 @@ if (typeof window !== "object") {
             mutation_config: {childList: true, subtree: true, characterData: true}
         },
         {
+            address_pattern: 'tab=buildLog',
             id: 'buildLog',
             transformer_class: 'mark',
             rule_set: BUILDLOG_TRANSFORMS,
@@ -249,7 +253,11 @@ if (typeof window !== "object") {
             mutation_config: {attributes: true, childList: true, subtree: true, characterData: true}
         }];
 
-    nodes.every((node) => {
+    let observers = [];
+
+    nodes_filtered_by_addr = nodes.filter((node) => {return location.search.match(node.address_pattern)});
+
+    nodes_filtered_by_addr.every((node) => {
         // select the target node
         const target = document.getElementById(node.id);
 
@@ -260,16 +268,16 @@ if (typeof window !== "object") {
             });
         });
 
-// configuration of the observer:
-        let config = node.mutation_config;
-
 // pass in the target node, as well as the observer options
-        observer.observe(target, config);
-        console.debug(`better.js: observe ${node.id}`);
-
-        window.onunload = () => {
-            observer.disconnect();
-            console.debug(`better.js: observe ${node.id}`);
-        };
+        observer.observe(target, node.mutation_config);
+        console.debug(`better.js: observe ${node.id}, ${node.transformer_class}`);
+        observers.push(observer);
     });
+
+    window.onunload = () => {
+        observers.forEach((item) => {
+            item.disconnect();
+            console.debug('better.js: stop observing');
+        })
+    };
 })();
