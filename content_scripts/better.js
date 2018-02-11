@@ -12,8 +12,8 @@ const CANARY = 'canary',
 const OVERVIEW_TRANSFORMS = [
     {
         // language=JSRegexp
-        from: '(https?:\/\/(?:[\\w:\.]+\@)?(?:\\w[-\\w\.]+)(?::\\d{1,5})?(?:\/(?:[\\w#\/_\.!=:-]*(?:\\?\\S+)?)?)?(([a-z0-9]{3})|([^\\s]{3})))(\\s+)',
-        to: '<a href="$1" target="_blank" data-previewtype="$3" class="betterpreview">$1</a>$5',
+        from: '(https?:\/\/(?:[\\w:\.]+\@)?(?:\\w[-\\w\.]+)(?::\\d{1,5})?(?:\/(?:[\\w#\/_\.!=:-]*(?:\\?\\S+)?)?)?)(\\s+)',
+        to: '<a href="$1" target="_blank" class="betterpreview">$1</a>$2',
         flags: 'g'
     },
     {
@@ -215,7 +215,7 @@ if (typeof window !== "object") {
     };
 }
 
-(function() {
+(function () {
 
     if (typeof window !== "object" || window.hasBetterReports) {
         return;
@@ -229,21 +229,24 @@ if (typeof window !== "object") {
             rule_set: OVERVIEW_TRANSFORMS,
             customizer: () => {
                 Array.from(document.getElementsByClassName(PREVIEW_CLASS)).forEach((item) => {
-                    // const previewtype = item.getAttribute('href').match(/\.(\w{3})$/);
-                    // if (undefined !== previewtype[1]) {
-                    //     item.dataset.previewtype = previewtype;
-                    item.addEventListener('mouseover', create_media_preview, false);
-                    item.addEventListener('focus', create_media_preview, false);
-                    item.addEventListener('click', toggle_media_preview, false);
-                    // }
+                    const href = item.getAttribute('href');
+                    const matcher = href.match(/\.(\w{1,4})$/);
+                    if (matcher && undefined!==matcher[1]) {
+                        item.dataset.previewtype = matcher[1];
+                        item.addEventListener('mouseover', create_media_preview, false);
+                        item.addEventListener('focus', create_media_preview, false);
+                        item.addEventListener('click', toggle_media_preview, false);
+                    }
                 });
-            }
+            },
+            mutation_config: {childList: true, subtree: true, characterData: true}
         },
         {
             id: 'buildLog',
             transformer_class: 'mark',
             rule_set: BUILDLOG_TRANSFORMS,
-            customizer: null
+            customizer: null,
+            mutation_config: {attributes: true, childList: true, subtree: true, characterData: true}
         }];
 
     nodes.every((node) => {
@@ -258,7 +261,7 @@ if (typeof window !== "object") {
         });
 
 // configuration of the observer:
-        let config = {attributes: true, childList: true, subtree: true, characterData: true};
+        let config = node.mutation_config;
 
 // pass in the target node, as well as the observer options
         observer.observe(target, config);

@@ -29,8 +29,12 @@ describe('Validate RegExp for link matching', () => {
                 expected: 'https://mr.smith@www.gridrouter.d3/wd'
             },
             {
-                input: 'http://web:web@gridrouter.d3#wd ',
-                expected: 'http://web:web@gridrouter.d3#wd'
+                input: 'http://web:web@gridrouter.d3/#wd ',
+                expected: 'http://web:web@gridrouter.d3/#wd'
+            },
+            {
+                input: 'http://web:web@gridrouter.d3/?picture.png ',
+                expected: 'http://web:web@gridrouter.d3/?picture.png'
             },
             {
                 input: 'https://web:web@gridrouter.d3:44441//hub ',
