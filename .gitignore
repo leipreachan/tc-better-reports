@@ -1,6 +1,8 @@
-.idea/*
+.idea/
+node_modules/
+_site/
 .editorconfig
 .web-extension-id
-_site/*
 Gemfile
 Gemfile.lock
+package-lock.json

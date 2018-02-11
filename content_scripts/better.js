@@ -4,11 +4,15 @@
 // TODO: c) add sliding
 // TODO: d) add options for preloading
 
+const CANARY = 'canary',
+    PREVIEW_CLASS = 'betterpreview',
+    MEDIA_PNG = 'png',
+    MEDIA_MP4 = 'mp4';
 
-const TRANSFORMATION_RULES = [
+const OVERVIEW_TRANSFORMS = [
     {
         // language=JSRegexp
-        from: '(https?:\\/\\/(?:[-\\w:\\@.]+)+(?::\\d+)?(?:/(?:[\\w#/_.!:-]*(?:\\?\\S+)?)?)?(([a-z0-9]{3})|([^\\s]{3})))(\\s+?)',
+        from: '(https?:\/\/(?:[\\w:\.]+\@)?(?:\\w[-\\w\.]+)(?::\\d{1,5})?(?:\/(?:[\\w#\/_\.!=:-]*(?:\\?\\S+)?)?)?(([a-z0-9]{3})|([^\\s]{3})))(\\s+)',
         to: '<a href="$1" target="_blank" data-previewtype="$3" class="betterpreview">$1</a>$5',
         flags: 'g'
     },
@@ -58,10 +62,6 @@ const BUILDLOG_TRANSFORMS = [
         flags: 'g'
     },
 ];
-
-const CANARY = 'canary',
-    MEDIA_PNG = 'png',
-    MEDIA_MP4 = 'mp4';
 
 const DEFAULT_MAX_HEIGHT = '80vh';
 
@@ -208,46 +208,65 @@ function transform_mutated_nodes(transformer_class, rules, customizer) {
     });
 }
 
-const nodes = [
-    {
-        id: 'buildResults',
-        transformer_class: 'fullStacktrace',
-        rule_set: TRANSFORMATION_RULES,
-        customizer: () => {
-            Array.from(document.getElementsByClassName('betterpreview')).forEach((item) => {
-                item.addEventListener('mouseover', create_media_preview, false);
-                item.addEventListener('focus', create_media_preview, false);
-                item.addEventListener('click', toggle_media_preview, false);
-            });
-        }
-    },
-    {
-        id: 'buildLog',
-        transformer_class: 'mark',
-        rule_set: BUILDLOG_TRANSFORMS,
-        customizer: null
-    }];
+// unit tests
+if (typeof window !== "object") {
+    module.exports = {
+        OVERVIEW_TRANSFORMS
+    };
+}
 
-nodes.every((node) => {
-    // select the target node
-    const target = document.getElementById(node.id);
+(function() {
+
+    if (typeof window !== "object" || window.hasBetterReports) {
+        return;
+    }
+    window.hasBetterReports = true;
+
+    const nodes = [
+        {
+            id: 'buildResults',
+            transformer_class: 'fullStacktrace',
+            rule_set: OVERVIEW_TRANSFORMS,
+            customizer: () => {
+                Array.from(document.getElementsByClassName(PREVIEW_CLASS)).forEach((item) => {
+                    // const previewtype = item.getAttribute('href').match(/\.(\w{3})$/);
+                    // if (undefined !== previewtype[1]) {
+                    //     item.dataset.previewtype = previewtype;
+                    item.addEventListener('mouseover', create_media_preview, false);
+                    item.addEventListener('focus', create_media_preview, false);
+                    item.addEventListener('click', toggle_media_preview, false);
+                    // }
+                });
+            }
+        },
+        {
+            id: 'buildLog',
+            transformer_class: 'mark',
+            rule_set: BUILDLOG_TRANSFORMS,
+            customizer: null
+        }];
+
+    nodes.every((node) => {
+        // select the target node
+        const target = document.getElementById(node.id);
 
 // create an observer instance
-    let observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            transform_mutated_nodes(node.transformer_class, node.rule_set, node.customizer)
+        let observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                transform_mutated_nodes(node.transformer_class, node.rule_set, node.customizer)
+            });
         });
-    });
 
 // configuration of the observer:
-    let config = {attributes: true, childList: true, subtree: true, characterData: true};
+        let config = {attributes: true, childList: true, subtree: true, characterData: true};
 
 // pass in the target node, as well as the observer options
-    observer.observe(target, config);
-    console.debug(`better.js: observe ${node.id}`);
-
-    window.onunload = () => {
-        observer.disconnect();
+        observer.observe(target, config);
         console.debug(`better.js: observe ${node.id}`);
-    };
-});
+
+        window.onunload = () => {
+            observer.disconnect();
+            console.debug(`better.js: observe ${node.id}`);
+        };
+    });
+})();
