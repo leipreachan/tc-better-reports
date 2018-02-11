@@ -6,6 +6,11 @@
 
 * something like `>>https://link<<` is parsed in a wrong way:(
 
+### 0.0.20 [stable]
+
+* added unit tests. Fixed the regular expression for "linkifying"
+* bugfix: buildlog has not been parsed
+
 ### 0.0.19 [stable]
 
 * stricter links validation

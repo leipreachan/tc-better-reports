@@ -4,7 +4,7 @@
 * a click on a link to an image / mp4 file will show you a preview with media content
   * large screenshots will be resized to fit the screen. You can zoom-in / zoom-out them.
 * it adds `<code>` nodes:
-  * a double click on the `<code>` node (the grey one) selects and copies its content
+  * a double click on the `<code>` node (the gray one) selects and copies its content
   * everything within `>>MMM<<` will be transformed to `<code>MMM</code>`
   * everything like `phpunit anything.php` will be transformed to `<code>phpunit anything.php</code>`
   * everything like `bundle exec ...` will be transformed to `<code>bundle exec .. </code>`
@@ -13,7 +13,11 @@
   * `User:? \d+` is transformed to `User:? <code>$1</code>`
   * [chrome://extensions/](chrome://extensions/) => Developer mode (v) => Update extensions now
 
-[Firefox](https://github.com/leipreachan/tc-better-reports/releases/latest) |
+Firefox (unlisted, I'll send you a link on request) |
 [Google Chrome](https://chrome.google.com/webstore/detail/tc-better-reports/idddfkaoefamlflojibpncamdcbnddpk)
 
 [Changelog](CHANGELOG.md)
+
+--
+
+yeah, I know the code is bad :)

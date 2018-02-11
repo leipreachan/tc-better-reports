@@ -4,12 +4,16 @@
 // TODO: c) add sliding
 // TODO: d) add options for preloading
 
+const CANARY = 'canary',
+    PREVIEW_CLASS = 'betterpreview',
+    MEDIA_PNG = 'png',
+    MEDIA_MP4 = 'mp4';
 
-const TRANSFORMATION_RULES = [
+const OVERVIEW_TRANSFORMS = [
     {
         // language=JSRegexp
-        from: '(https?:\\/\\/(?:[-\\w:\\@.]+)+(?::\\d+)?(?:/(?:[\\w#/_.!:-]*(?:\\?\\S+)?)?)?(([a-z0-9]{3})|([^\\s]{3})))(\\s+?)',
-        to: '<a href="$1" target="_blank" data-previewtype="$3" class="betterpreview">$1</a>$5',
+        from: '(https?:\/\/(?:[\\w:\.]+\@)?(?:\\w[-\\w\.]+)(?::\\d{1,5})?(?:\/(?:[\\w#\/_\.!=:-]*(?:\\?\\S+)?)?)?)(\\s+)',
+        to: '<a href="$1" target="_blank" class="betterpreview">$1</a>$2',
         flags: 'g'
     },
     {
@@ -58,10 +62,6 @@ const BUILDLOG_TRANSFORMS = [
         flags: 'g'
     },
 ];
-
-const CANARY = 'canary',
-    MEDIA_PNG = 'png',
-    MEDIA_MP4 = 'mp4';
 
 const DEFAULT_MAX_HEIGHT = '80vh';
 
@@ -200,7 +200,9 @@ function transform_mutated_nodes(transformer_class, rules, customizer) {
         Array.from(blocks).forEach((item) => {
             transform_block(item, rules)
         });
-        customizer();
+        if (typeof customizer === "function") {
+            customizer();
+        }
     }
 
     Array.from(document.getElementsByTagName('code')).forEach((item) => {
@@ -208,46 +210,74 @@ function transform_mutated_nodes(transformer_class, rules, customizer) {
     });
 }
 
-const nodes = [
-    {
-        id: 'buildResults',
-        transformer_class: 'fullStacktrace',
-        rule_set: TRANSFORMATION_RULES,
-        customizer: () => {
-            Array.from(document.getElementsByClassName('betterpreview')).forEach((item) => {
-                item.addEventListener('mouseover', create_media_preview, false);
-                item.addEventListener('focus', create_media_preview, false);
-                item.addEventListener('click', toggle_media_preview, false);
-            });
-        }
-    },
-    {
-        id: 'buildLog',
-        transformer_class: 'mark',
-        rule_set: BUILDLOG_TRANSFORMS,
-        customizer: null
-    }];
+// unit tests
+if (typeof window !== "object") {
+    module.exports = {
+        OVERVIEW_TRANSFORMS
+    };
+}
 
-nodes.every((node) => {
-    // select the target node
-    const target = document.getElementById(node.id);
+(function () {
+
+    if (typeof window !== "object" || window.hasBetterReports) {
+        return;
+    }
+    window.hasBetterReports = true;
+
+    const nodes = [
+        {
+            address_pattern: 'tab=buildResultsDiv',
+            id: 'buildResults',
+            transformer_class: 'fullStacktrace',
+            rule_set: OVERVIEW_TRANSFORMS,
+            customizer: () => {
+                Array.from(document.getElementsByClassName(PREVIEW_CLASS)).forEach((item) => {
+                    const href = item.getAttribute('href');
+                    const matcher = href.match(/\.(\w{1,4})$/);
+                    if (matcher && undefined !== matcher[1]) {
+                        item.dataset.previewtype = matcher[1];
+                        item.addEventListener('mouseover', create_media_preview, false);
+                        item.addEventListener('focus', create_media_preview, false);
+                        item.addEventListener('click', toggle_media_preview, false);
+                    }
+                });
+            },
+            mutation_config: {childList: true, subtree: true, characterData: true}
+        },
+        {
+            address_pattern: 'tab=buildLog',
+            id: 'buildLog',
+            transformer_class: 'mark',
+            rule_set: BUILDLOG_TRANSFORMS,
+            customizer: null,
+            mutation_config: {attributes: true, childList: true, subtree: true, characterData: true}
+        }];
+
+    let observers = [];
+
+    nodes_filtered_by_addr = nodes.filter((node) => {return location.search.match(node.address_pattern)});
+
+    nodes_filtered_by_addr.every((node) => {
+        // select the target node
+        const target = document.getElementById(node.id);
 
 // create an observer instance
-    let observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            transform_mutated_nodes(node.transformer_class, node.rule_set, node.customizer)
+        let observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                transform_mutated_nodes(node.transformer_class, node.rule_set, node.customizer)
+            });
         });
-    });
-
-// configuration of the observer:
-    let config = {attributes: true, childList: true, subtree: true, characterData: true};
 
 // pass in the target node, as well as the observer options
-    observer.observe(target, config);
-    console.debug(`better.js: observe ${node.id}`);
+        observer.observe(target, node.mutation_config);
+        console.debug(`better.js: observe ${node.id}, ${node.transformer_class}`);
+        observers.push(observer);
+    });
 
     window.onunload = () => {
-        observer.disconnect();
-        console.debug(`better.js: observe ${node.id}`);
+        observers.forEach((item) => {
+            item.disconnect();
+            console.debug('better.js: stop observing');
+        })
     };
-});
+})();
