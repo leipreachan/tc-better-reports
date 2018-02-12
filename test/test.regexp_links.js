@@ -1,8 +1,15 @@
 const {OVERVIEW_TRANSFORMS} = require('../content_scripts/better');
 let assert = require('assert');
+
+let LINKIFIER = OVERVIEW_TRANSFORMS.filter((i) => {
+    return i.name === 'linkify';
+});
+
+LINKIFIER = LINKIFIER[0];
+
 describe('Assert RegExp for link matching', () => {
-    it('RegExp for link matching is defined', () => {
-        assert.ok(OVERVIEW_TRANSFORMS[0]['from']);
+        it('RegExp for link matching is defined', () => {
+        assert.ok(LINKIFIER);
     });
 
     describe('Assert RegExp matches valid links', () => {
@@ -76,7 +83,7 @@ describe('Assert RegExp for link matching', () => {
         ];
         let testDataMatch = function (dataItem) {
             return function () {
-                const regExp = new RegExp(OVERVIEW_TRANSFORMS[0]['from']);
+                const regExp = new RegExp(LINKIFIER.from);
                 const match = dataItem.input.match(regExp);
                 assert.ok(match);
                 assert.equal(match[1], dataItem.expected);
@@ -102,7 +109,7 @@ describe('Assert RegExp for link matching', () => {
         ];
         let testDataMatch = function (dataItem) {
             return function () {
-                const regExp = new RegExp(OVERVIEW_TRANSFORMS[0]['from']);
+                const regExp = new RegExp(LINKIFIER.from);
                 const match = dataItem.input.match(regExp);
                 assert.ok(!match);
             };

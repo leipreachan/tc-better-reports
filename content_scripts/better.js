@@ -1,24 +1,25 @@
-/// TODO: to fix incorrect nesting
+/// TODO: to fix incorrect nesting ??
 // Element >>http://web:web@gridrouter.d3:44441/wd/hub/session/b0721b41341782bfcff2507e2e5894a6d1e09d9e-ac15-41ea-905e-d9bba244fd20/element/44<< is not clickable at point (631.5, 584.0333251953125). Other element would receive the click: <div id="disable_ovl"></div>
-
-// TODO: c) add sliding
-// TODO: d) add options for preloading
+// TODO: opening a preview should not call mutator
+// TODO: add options for preloading (maybe?)
 
 const CANARY = 'canary',
-    PREVIEW_CLASS = 'betterpreview',
+    PREVIEW_CLASS_BEFORE = 'better',
+    PREVIEW_CLASS_AFTER = 'betterpreview',
     MEDIA_PNG = 'png',
     MEDIA_MP4 = 'mp4';
 
 const OVERVIEW_TRANSFORMS = [
     {
+        name: 'linkify',
         // language=JSRegexp
         from: '(https?:\/\/(?:[\\w:\.]+\@)?(?:\\w[-\\w\.]+)(?::\\d{1,5})?(?:\/(?:[\\w#\/_\.!=:-]*(?:\\?\\S+)?)?)?)(\\s+)',
-        to: '<a href="$1" target="_blank" class="betterpreview">$1</a>$2',
+        to: `<a href="$1" target="_blank" class="${PREVIEW_CLASS_BEFORE}">$1</a>$2`,
         flags: 'g'
     },
     {
         from: '&gt;&gt;(.+?)&lt;&lt;',
-        to: '>><code>$1</code><<',
+        to: '&gt;&gt;<code>$1</code>&lt;&lt;',
         flags: 'g'
     },
     {
@@ -33,7 +34,7 @@ const OVERVIEW_TRANSFORMS = [
     },
     {
         // language=JSRegexp
-        from: '(features\\/[\\w_\\/]+\\.feature:\\d+)',
+        from: '(features\/[\\w_\/]+\.feature:\\d+)',
         to: '<code>$1</code>',
         flags: 'g'
     },
@@ -44,7 +45,7 @@ const OVERVIEW_TRANSFORMS = [
     },
     {
         // language=JSRegexp
-        from: '(User: +)(\\d+)([ \\/]+)(\\w+@[\\w.]+)([ \\/]+)(\\w+)',
+        from: '(User: +)(\\d+)([ \/]+)(\\w+\@[\\w.]+)([ \/]+)(\\w+)',
         to: '$1<code>$2</code>$3<code>$4</code>$5<code>$6</code>',
         flags: 'g'
     },
@@ -57,7 +58,7 @@ const OVERVIEW_TRANSFORMS = [
 
 const BUILDLOG_TRANSFORMS = [
     {
-        from: '(features\/[\\w_\\/\\.: ]+)',
+        from: '(features\/[\\w_\/\.: ]+)',
         to: '<code>$1</code>',
         flags: 'g'
     },
@@ -66,8 +67,12 @@ const BUILDLOG_TRANSFORMS = [
 const DEFAULT_MAX_HEIGHT = '80vh';
 
 function get_media_type(element) {
-    return element.dataset.previewtype;
+    return element.previewtype || '';
 }
+
+let is_known_type = function (type) {
+    return type === MEDIA_PNG || type === MEDIA_MP4;
+};
 
 function create_media_preview(event) {
     const target = event.target;
@@ -80,8 +85,9 @@ function create_media_preview(event) {
         return preview_container;
     };
 
-    const toggle_image_zoom = (preview_container, image) => {
-        if (preview_container.zoomed === true) {
+    const toggle_image_zoom = (event) => {
+        let image = event.target;
+        if (image.zoomed === true) {
             image.style.maxHeight = DEFAULT_MAX_HEIGHT;
             image.style.cursor = 'zoom-in';
             image.title = 'Zoom in';
@@ -90,10 +96,11 @@ function create_media_preview(event) {
             image.style.cursor = 'zoom-out';
             image.title = 'Zoom out';
         }
-        preview_container.zoomed = !preview_container.zoomed;
+        image.zoomed = !image.zoomed;
     };
 
-    const create_media = (type, preview_container, src) => {
+    const create_media = (type, src) => {
+        let media = null;
         switch (type) {
             case MEDIA_PNG:
                 media = document.createElement('img');
@@ -102,14 +109,13 @@ function create_media_preview(event) {
                 media.addEventListener('load', () => {
                     if (window.innerHeight < media.height + 200) {
                         media.title = 'Zoom in';
-                        preview_container.zoomed = false;
-                        preview_container.addEventListener('click', () => toggle_image_zoom(preview_container, media));
+                        media.zoomed = false;
+                        media.addEventListener('click', toggle_image_zoom);
                     }
                 });
                 break;
             case MEDIA_MP4:
                 media = document.createElement('video');
-                media.setAttribute('id', 'video-preview');
                 media.setAttribute('controls', 'true');
                 media.setAttribute('preload', 'metadata');
                 media.setAttribute('playsinline', 'true');
@@ -120,10 +126,10 @@ function create_media_preview(event) {
         return media;
     };
 
-    if ((type === MEDIA_PNG || type === MEDIA_MP4) && target.previewId === undefined) {
+    if (is_known_type(type) && target.previewId === undefined) {
         console.debug('better.js: create preview');
         const preview_container = create_preview_container(target);
-        const media = create_media(type, preview_container, target.href);
+        const media = create_media(type, target.href);
 
         preview_container.appendChild(media);
         target.parentNode.insertBefore(preview_container, target.nextSibling);
@@ -138,8 +144,7 @@ function toggle_media_preview(event) {
     const type = get_media_type(target);
     const preview_container = document.getElementById(target.previewId);
 
-    if ((type === MEDIA_PNG || type === MEDIA_MP4) && target.previewId !== undefined) {
-
+    if (is_known_type(type) && target.previewId !== undefined) {
         event.preventDefault();
         if (target.previewOpened) {
             preview_container.style.display = 'none';
@@ -231,26 +236,29 @@ if (typeof window !== "object") {
             transformer_class: 'fullStacktrace',
             rule_set: OVERVIEW_TRANSFORMS,
             customizer: () => {
-                Array.from(document.getElementsByClassName(PREVIEW_CLASS)).forEach((item) => {
-                    const href = item.getAttribute('href');
-                    const matcher = href.match(/\.(\w{1,4})$/);
-                    if (matcher && undefined !== matcher[1]) {
-                        item.dataset.previewtype = matcher[1];
-                        item.addEventListener('mouseover', create_media_preview, false);
-                        item.addEventListener('focus', create_media_preview, false);
-                        item.addEventListener('click', toggle_media_preview, false);
+                const previews = document.getElementsByClassName(PREVIEW_CLASS_BEFORE);
+                // console.debug('better.js', `${previews.length} elements to be transformed`);
+                Array.from(previews).forEach((item) => {
+                    if (item.previewtype === undefined) {
+                        const href = item.getAttribute('href');
+                        const matcher = href.match(/\.(\w{1,4})$/);
+                        item.previewtype = matcher && matcher[1] ? matcher[1] : '';
+                        if (item.previewtype.length > 0) {
+                            item.addEventListener('mouseover', create_media_preview, false);
+                            item.addEventListener('focus', create_media_preview, false);
+                            item.addEventListener('click', toggle_media_preview, false);
+                        }
                     }
+                    item.classList.replace(PREVIEW_CLASS_BEFORE, PREVIEW_CLASS_AFTER);
                 });
-            },
-            mutation_config: {childList: true, subtree: true, characterData: true}
+            }
         },
         {
             address_pattern: 'tab=buildLog',
             id: 'buildLog',
             transformer_class: 'mark',
             rule_set: BUILDLOG_TRANSFORMS,
-            customizer: null,
-            mutation_config: {attributes: true, childList: true, subtree: true, characterData: true}
+            customizer: null
         }];
 
     let observers = [];
@@ -264,12 +272,13 @@ if (typeof window !== "object") {
 // create an observer instance
         let observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
+                // console.debug('better.js mutation', mutation);
                 transform_mutated_nodes(node.transformer_class, node.rule_set, node.customizer)
             });
         });
 
 // pass in the target node, as well as the observer options
-        observer.observe(target, node.mutation_config);
+        observer.observe(target, {attributes: true, childList: true, subtree: true, characterData: true});
         console.debug(`better.js: observe ${node.id}, ${node.transformer_class}`);
         observers.push(observer);
     });

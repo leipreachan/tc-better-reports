@@ -24,11 +24,11 @@ div.preview {
     max-width: 90vw;
 }
 
-[data-previewtype=png], [data-previewtype=mp4] {
+a.betterpreview[href$='.png'], a.betterpreview[href$='.mp4'] {
     border-bottom: 1px dashed;
 }
 
-[data-previewtype]:hover {
+a.betterpreview:hover {
     text-decoration: none;
     border-bottom: 1px solid;
 }
