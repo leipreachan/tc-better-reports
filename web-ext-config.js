@@ -1,6 +1,4 @@
 module.exports = {
-    // Global options:
-    verbose: true,
     // Command options:
     artifactsDir: "../web-ext-artifacts/",
     ignoreFiles: [
