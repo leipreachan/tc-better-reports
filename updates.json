@@ -1,20 +1,24 @@
 {
-    "addons": {
-        "tc-better-reports@badoo.com": {
-            "updates": [
-                {
-                    "version": "0.0.19",
-                    "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.0.19/tc_better_reports-0.0.19-an.fx.xpi"
-                },
-	       	   {
-                    "version": "0.0.19.1",
-                    "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.0.19.1/tc_better_reports-0.0.19.1-an.fx.xpi"
-                },
-	       	   {
-                    "version": "0.0.20",
-                    "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.0.20/tc_better_reports-0.0.20-an.fx.xpi"
-                }
-            ]
+  "addons": {
+    "tc-better-reports@badoo.com": {
+      "updates": [
+        {
+          "version": "0.0.19",
+          "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.0.19/tc_better_reports-0.0.19-an.fx.xpi"
+        },
+        {
+          "version": "0.0.19.1",
+          "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.0.19.1/tc_better_reports-0.0.19.1-an.fx.xpi"
+        },
+        {
+          "version": "0.0.20",
+          "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.0.20/tc_better_reports-0.0.20-an.fx.xpi"
+        },
+        {
+          "version": "0.0.21",
+          "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.0.21/tc_better_reports-0.0.21-an.fx.xpi"
         }
-	}
+      ]
+    }
+  }
 }
