@@ -19,7 +19,7 @@ const OVERVIEW_TRANSFORMS = [
     },
     {
         from: '&gt;&gt;(.+?)&lt;&lt;',
-        to: '>><code>$1</code><<',
+        to: '&gt;&gt;<code>$1</code>&lt;&lt;',
         flags: 'g'
     },
     {
@@ -34,7 +34,7 @@ const OVERVIEW_TRANSFORMS = [
     },
     {
         // language=JSRegexp
-        from: '(features\\/[\\w_\\/]+\\.feature:\\d+)',
+        from: '(features\/[\\w_\/]+\.feature:\\d+)',
         to: '<code>$1</code>',
         flags: 'g'
     },
@@ -45,7 +45,7 @@ const OVERVIEW_TRANSFORMS = [
     },
     {
         // language=JSRegexp
-        from: '(User: +)(\\d+)([ \\/]+)(\\w+@[\\w.]+)([ \\/]+)(\\w+)',
+        from: '(User: +)(\\d+)([ \/]+)(\\w+\@[\\w.]+)([ \/]+)(\\w+)',
         to: '$1<code>$2</code>$3<code>$4</code>$5<code>$6</code>',
         flags: 'g'
     },
@@ -58,7 +58,7 @@ const OVERVIEW_TRANSFORMS = [
 
 const BUILDLOG_TRANSFORMS = [
     {
-        from: '(features\/[\\w_\\/\\.: ]+)',
+        from: '(features\/[\\w_\/\.: ]+)',
         to: '<code>$1</code>',
         flags: 'g'
     },
