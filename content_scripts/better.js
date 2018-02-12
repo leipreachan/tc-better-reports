@@ -1,6 +1,5 @@
 /// TODO: to fix incorrect nesting ??
 // Element >>http://web:web@gridrouter.d3:44441/wd/hub/session/b0721b41341782bfcff2507e2e5894a6d1e09d9e-ac15-41ea-905e-d9bba244fd20/element/44<< is not clickable at point (631.5, 584.0333251953125). Other element would receive the click: <div id="disable_ovl"></div>
-// TODO: to fix a bug: zoom-in feature works with the very first open preview image. Having more previews opened the click zooms in the very first preview anyway
 // TODO: opening a preview should not call mutator
 // TODO: add options for preloading (maybe?)
 
@@ -71,6 +70,10 @@ function get_media_type(element) {
     return element.previewtype || '';
 }
 
+let is_known_type = function (type) {
+    return type === MEDIA_PNG || type === MEDIA_MP4;
+};
+
 function create_media_preview(event) {
     const target = event.target;
     const type = get_media_type(target);
@@ -82,8 +85,9 @@ function create_media_preview(event) {
         return preview_container;
     };
 
-    const toggle_image_zoom = (preview_container, image) => {
-        if (preview_container.zoomed === true) {
+    const toggle_image_zoom = (event) => {
+        let image = event.target;
+        if (image.zoomed === true) {
             image.style.maxHeight = DEFAULT_MAX_HEIGHT;
             image.style.cursor = 'zoom-in';
             image.title = 'Zoom in';
@@ -92,10 +96,11 @@ function create_media_preview(event) {
             image.style.cursor = 'zoom-out';
             image.title = 'Zoom out';
         }
-        preview_container.zoomed = !preview_container.zoomed;
+        image.zoomed = !image.zoomed;
     };
 
-    const create_media = (type, preview_container, src) => {
+    const create_media = (type, src) => {
+        let media = null;
         switch (type) {
             case MEDIA_PNG:
                 media = document.createElement('img');
@@ -104,14 +109,13 @@ function create_media_preview(event) {
                 media.addEventListener('load', () => {
                     if (window.innerHeight < media.height + 200) {
                         media.title = 'Zoom in';
-                        preview_container.zoomed = false;
-                        preview_container.addEventListener('click', () => toggle_image_zoom(preview_container, media));
+                        media.zoomed = false;
+                        media.addEventListener('click', toggle_image_zoom);
                     }
                 });
                 break;
             case MEDIA_MP4:
                 media = document.createElement('video');
-                media.setAttribute('id', 'video-preview');
                 media.setAttribute('controls', 'true');
                 media.setAttribute('preload', 'metadata');
                 media.setAttribute('playsinline', 'true');
@@ -122,10 +126,10 @@ function create_media_preview(event) {
         return media;
     };
 
-    if ((type === MEDIA_PNG || type === MEDIA_MP4) && target.previewId === undefined) {
+    if (is_known_type(type) && target.previewId === undefined) {
         console.debug('better.js: create preview');
         const preview_container = create_preview_container(target);
-        const media = create_media(type, preview_container, target.href);
+        const media = create_media(type, target.href);
 
         preview_container.appendChild(media);
         target.parentNode.insertBefore(preview_container, target.nextSibling);
@@ -140,8 +144,7 @@ function toggle_media_preview(event) {
     const type = get_media_type(target);
     const preview_container = document.getElementById(target.previewId);
 
-    if ((type === MEDIA_PNG || type === MEDIA_MP4) && target.previewId !== undefined) {
-
+    if (is_known_type(type) && target.previewId !== undefined) {
         event.preventDefault();
         if (target.previewOpened) {
             preview_container.style.display = 'none';
