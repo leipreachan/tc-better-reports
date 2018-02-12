@@ -1,8 +1,8 @@
-/// TODO: to fix incorrect nesting
+/// TODO: to fix incorrect nesting ??
 // Element >>http://web:web@gridrouter.d3:44441/wd/hub/session/b0721b41341782bfcff2507e2e5894a6d1e09d9e-ac15-41ea-905e-d9bba244fd20/element/44<< is not clickable at point (631.5, 584.0333251953125). Other element would receive the click: <div id="disable_ovl"></div>
-
-// TODO: c) add sliding
-// TODO: d) add options for preloading
+// TODO: to fix a bug: zoom-in feature works with the very first open preview image. Having more previews opened the click zooms in the very first preview anyway
+// TODO: opening a preview should not call mutator
+// TODO: add options for preloading (maybe?)
 
 const CANARY = 'canary',
     PREVIEW_CLASS = 'betterpreview',
@@ -11,6 +11,7 @@ const CANARY = 'canary',
 
 const OVERVIEW_TRANSFORMS = [
     {
+        name: 'linkify',
         // language=JSRegexp
         from: '(https?:\/\/(?:[\\w:\.]+\@)?(?:\\w[-\\w\.]+)(?::\\d{1,5})?(?:\/(?:[\\w#\/_\.!=:-]*(?:\\?\\S+)?)?)?)(\\s+)',
         to: '<a href="$1" target="_blank" class="betterpreview">$1</a>$2',
