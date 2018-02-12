@@ -5,7 +5,8 @@
 // TODO: add options for preloading (maybe?)
 
 const CANARY = 'canary',
-    PREVIEW_CLASS = 'betterpreview',
+    PREVIEW_CLASS_BEFORE = 'better',
+    PREVIEW_CLASS_AFTER = 'betterpreview',
     MEDIA_PNG = 'png',
     MEDIA_MP4 = 'mp4';
 
@@ -14,7 +15,7 @@ const OVERVIEW_TRANSFORMS = [
         name: 'linkify',
         // language=JSRegexp
         from: '(https?:\/\/(?:[\\w:\.]+\@)?(?:\\w[-\\w\.]+)(?::\\d{1,5})?(?:\/(?:[\\w#\/_\.!=:-]*(?:\\?\\S+)?)?)?)(\\s+)',
-        to: '<a href="$1" target="_blank" class="betterpreview">$1</a>$2',
+        to: `<a href="$1" target="_blank" class="${PREVIEW_CLASS_BEFORE}">$1</a>$2`,
         flags: 'g'
     },
     {
@@ -67,7 +68,7 @@ const BUILDLOG_TRANSFORMS = [
 const DEFAULT_MAX_HEIGHT = '80vh';
 
 function get_media_type(element) {
-    return element.dataset.previewtype;
+    return element.previewtype || '';
 }
 
 function create_media_preview(event) {
@@ -232,26 +233,29 @@ if (typeof window !== "object") {
             transformer_class: 'fullStacktrace',
             rule_set: OVERVIEW_TRANSFORMS,
             customizer: () => {
-                Array.from(document.getElementsByClassName(PREVIEW_CLASS)).forEach((item) => {
-                    const href = item.getAttribute('href');
-                    const matcher = href.match(/\.(\w{1,4})$/);
-                    if (matcher && undefined !== matcher[1]) {
-                        item.dataset.previewtype = matcher[1];
-                        item.addEventListener('mouseover', create_media_preview, false);
-                        item.addEventListener('focus', create_media_preview, false);
-                        item.addEventListener('click', toggle_media_preview, false);
+                const previews = document.getElementsByClassName(PREVIEW_CLASS_BEFORE);
+                // console.debug('better.js', `${previews.length} elements to be transformed`);
+                Array.from(previews).forEach((item) => {
+                    if (item.previewtype === undefined) {
+                        const href = item.getAttribute('href');
+                        const matcher = href.match(/\.(\w{1,4})$/);
+                        item.previewtype = matcher && matcher[1] ? matcher[1] : '';
+                        if (item.previewtype.length > 0) {
+                            item.addEventListener('mouseover', create_media_preview, false);
+                            item.addEventListener('focus', create_media_preview, false);
+                            item.addEventListener('click', toggle_media_preview, false);
+                        }
                     }
+                    item.classList.replace(PREVIEW_CLASS_BEFORE, PREVIEW_CLASS_AFTER);
                 });
-            },
-            mutation_config: {childList: true, subtree: true, characterData: true}
+            }
         },
         {
             address_pattern: 'tab=buildLog',
             id: 'buildLog',
             transformer_class: 'mark',
             rule_set: BUILDLOG_TRANSFORMS,
-            customizer: null,
-            mutation_config: {attributes: true, childList: true, subtree: true, characterData: true}
+            customizer: null
         }];
 
     let observers = [];
@@ -265,12 +269,13 @@ if (typeof window !== "object") {
 // create an observer instance
         let observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
+                // console.debug('better.js mutation', mutation);
                 transform_mutated_nodes(node.transformer_class, node.rule_set, node.customizer)
             });
         });
 
 // pass in the target node, as well as the observer options
-        observer.observe(target, node.mutation_config);
+        observer.observe(target, {attributes: true, childList: true, subtree: true, characterData: true});
         console.debug(`better.js: observe ${node.id}, ${node.transformer_class}`);
         observers.push(observer);
     });
