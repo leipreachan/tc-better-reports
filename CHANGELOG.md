@@ -6,7 +6,7 @@
 
 * something like `>>https://link<<` is parsed in a wrong way:(
 
-### 0.0.20 [stable]
+### 0.0.21 [stable]
 
 * technical debts
 * bugfix: when there are several previews opened on the page, the first opened preview got zoomed-in and zoomed-out instead of any clicked 
