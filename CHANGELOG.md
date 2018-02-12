@@ -8,6 +8,11 @@
 
 ### 0.0.20 [stable]
 
+* technical debts
+* bugfix: when there are several previews opened on the page, the first opened preview got zoomed-in and zoomed-out instead of any clicked 
+
+### 0.0.20 [stable]
+
 * added unit tests. Fixed the regular expression for "linkifying"
 * bugfix: buildlog has not been parsed
 
