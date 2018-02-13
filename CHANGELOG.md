@@ -6,7 +6,11 @@
 
 * something like `>>https://link<<` is parsed in a wrong way:(
 
-### 0.0.21 [stable]
+### 0.0.22
+
+* bugfix: a user can navigate to the Overview tab directly thus the location property doesn't have 'tab=' substring. Matching fails and we don't apply anything.
+
+### 0.0.21 
 
 * technical debts
 * bugfix: when there are several previews opened on the page, the first opened preview got zoomed-in and zoomed-out instead of any clicked 

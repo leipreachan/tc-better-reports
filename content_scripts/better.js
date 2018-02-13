@@ -1,6 +1,8 @@
-/// TODO: to fix incorrect nesting ??
+/// TODO: to check if still valid and fix incorrect nesting ??
 // Element >>http://web:web@gridrouter.d3:44441/wd/hub/session/b0721b41341782bfcff2507e2e5894a6d1e09d9e-ac15-41ea-905e-d9bba244fd20/element/44<< is not clickable at point (631.5, 584.0333251953125). Other element would receive the click: <div id="disable_ovl"></div>
 // TODO: opening a preview should not call mutator
+// TODO: get rid of double filtering (firstly filter TRANSFORM_RULES by address, if get default filters)
+// TODO: there should be only one default TRANSFORM_RULE as all the others will be ignored
 // TODO: add options for preloading (maybe?)
 
 const CANARY = 'canary',
@@ -63,6 +65,38 @@ const BUILDLOG_TRANSFORMS = [
         flags: 'g'
     },
 ];
+
+const TRANSFORM_RULES = [
+    {
+        // address_pattern: 'tab=buildResultsDiv',
+        id: 'buildResults',
+        transformer_class: 'fullStacktrace',
+        rule_set: OVERVIEW_TRANSFORMS,
+        customizer: () => {
+            const previews = document.getElementsByClassName(PREVIEW_CLASS_BEFORE);
+            // console.debug('better.js', `${previews.length} elements to be transformed`);
+            Array.from(previews).forEach((item) => {
+                if (item.previewtype === undefined) {
+                    const href = item.getAttribute('href');
+                    const matcher = href.match(/\.(\w{1,4})$/);
+                    item.previewtype = matcher && matcher[1] ? matcher[1] : '';
+                    if (item.previewtype.length > 0) {
+                        item.addEventListener('mouseover', create_media_preview, false);
+                        item.addEventListener('focus', create_media_preview, false);
+                        item.addEventListener('click', toggle_media_preview, false);
+                    }
+                }
+                item.classList.replace(PREVIEW_CLASS_BEFORE, PREVIEW_CLASS_AFTER);
+            });
+        }
+    },
+    {
+        address_pattern: 'tab=buildLog',
+        id: 'buildLog',
+        transformer_class: 'mark',
+        rule_set: BUILDLOG_TRANSFORMS,
+        customizer: null
+    }];
 
 const DEFAULT_MAX_HEIGHT = '80vh';
 
@@ -229,41 +263,20 @@ if (typeof window !== "object") {
     }
     window.hasBetterReports = true;
 
-    const nodes = [
-        {
-            address_pattern: 'tab=buildResultsDiv',
-            id: 'buildResults',
-            transformer_class: 'fullStacktrace',
-            rule_set: OVERVIEW_TRANSFORMS,
-            customizer: () => {
-                const previews = document.getElementsByClassName(PREVIEW_CLASS_BEFORE);
-                // console.debug('better.js', `${previews.length} elements to be transformed`);
-                Array.from(previews).forEach((item) => {
-                    if (item.previewtype === undefined) {
-                        const href = item.getAttribute('href');
-                        const matcher = href.match(/\.(\w{1,4})$/);
-                        item.previewtype = matcher && matcher[1] ? matcher[1] : '';
-                        if (item.previewtype.length > 0) {
-                            item.addEventListener('mouseover', create_media_preview, false);
-                            item.addEventListener('focus', create_media_preview, false);
-                            item.addEventListener('click', toggle_media_preview, false);
-                        }
-                    }
-                    item.classList.replace(PREVIEW_CLASS_BEFORE, PREVIEW_CLASS_AFTER);
-                });
-            }
-        },
-        {
-            address_pattern: 'tab=buildLog',
-            id: 'buildLog',
-            transformer_class: 'mark',
-            rule_set: BUILDLOG_TRANSFORMS,
-            customizer: null
-        }];
-
     let observers = [];
 
-    nodes_filtered_by_addr = nodes.filter((node) => {return location.search.match(node.address_pattern)});
+    // filter by address matching
+    let nodes_filtered_by_addr = TRANSFORM_RULES.filter((node) => {
+        return node.address_pattern !== undefined && location.search.match(node.address_pattern);
+    });
+
+    // nothing found, get the default one
+    if (nodes_filtered_by_addr.length === 0)
+    {
+        nodes_filtered_by_addr = TRANSFORM_RULES.filter((node) => {
+            return node.address_pattern === undefined;
+        });
+    }
 
     nodes_filtered_by_addr.every((node) => {
         // select the target node
