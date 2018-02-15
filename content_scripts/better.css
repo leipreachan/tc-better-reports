@@ -1,6 +1,6 @@
 code {
     background-color: rgba(220, 220, 220, .5);
-    border-radius: 2px;
+    border-radius: 3px;
     box-decoration-break: clone;
     font-family: Menlo, "Bitstream Vera Sans Mono", "Ubuntu Mono", "Courier New", Courier, consolas, "Liberation Mono", monospace;
     padding: 0.2em;
@@ -10,13 +10,14 @@ code {
 }
 
 div.preview {
-    padding: 5px 5px;
+    padding: 10px 5px 5px 5px;
     display: none;
 }
 
 .preview > img, .preview > video {
     box-shadow: 0 0 10px dimgray;
-    border: 10px solid white;
+    border: 10px solid darkgrey;
+    border-radius: 3px;
 }
 
 .preview > img {
