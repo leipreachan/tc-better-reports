@@ -25,12 +25,7 @@ const OVERVIEW_TRANSFORMS = [
         flags: 'g'
     },
     {
-        from: "(phpunit +.+)\n",
-        to: "<code>$1</code>\n",
-        flags: 'g'
-    },
-    {
-        from: "(bundle +exec +.+)\n",
+        from: "((phpunit|bundle.exec|docker-compose.run|./docker_droid.sh).+)\n",
         to: "<code>$1</code>\n",
         flags: 'g'
     },
@@ -38,11 +33,6 @@ const OVERVIEW_TRANSFORMS = [
         // language=JSRegexp
         from: '(features\/[\\w_\/]+\.feature:\\d+)',
         to: '<code>$1</code>',
-        flags: 'g'
-    },
-    {
-        from: "(docker-compose run.+)\n",
-        to: "<code>$1</code>\n",
         flags: 'g'
     },
     {

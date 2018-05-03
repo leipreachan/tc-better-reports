@@ -1,9 +1,10 @@
 {
   "name": "tc-better-reports",
-  "version": "0.0.20",
+  "version": "0.0.24",
   "dependencies": {
     "mocha": "^5.0.0",
-    "web-ext": "^2.4.0"
+    "npm": "^6.0.0",
+    "web-ext": "^2.6.0"
   },
   "scripts": {
     "test": "mocha"

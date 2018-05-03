@@ -3,10 +3,10 @@ code {
     border-radius: 3px;
     box-decoration-break: clone;
     font-family: Menlo, "Bitstream Vera Sans Mono", "Ubuntu Mono", "Courier New", Courier, consolas, "Liberation Mono", monospace;
-    padding: 0.2em;
+    padding: 0.1em;
     word-wrap: break-word;
     border: 1px dotted #c0c0c0;
-    line-height: 2em;
+    line-height: 1.65em;
 }
 
 div.preview {
