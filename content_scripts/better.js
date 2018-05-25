@@ -7,8 +7,8 @@
 
 const CANARY = 'canary',
     PREVIEW_CLASS_BEFORE = 'better',
-    PREVIEW_CLASS_AFTER = 'betterpreview',
-    INTELLIJ_LINK_CLASS = 'better-intellij-link'
+    PREVIEW_CLASS_AFTER = 'better-preview',
+    INTELLIJ_LINK_CLASS = 'better-intellij-link',
     MEDIA_PNG = 'png',
     MEDIA_MP4 = 'mp4';
 
@@ -32,8 +32,8 @@ const OVERVIEW_TRANSFORMS = [
     },
     {
         // language=JSRegexp
-        from: '(?:\\.\\/)?([\\.\\w_\\/]+:\\d+)\\:in',
-        to: `<code>$1</code><a href="#" class="${INTELLIJ_LINK_CLASS}" data-path="$1" title="Open file in IDE"></a>`,
+        from: '((?:\.\/)?[\.\\w_\\/]+\.(?:rb|feature):\\d+)(:in)?',
+        to: `<code>$1</code><a href="#" class="${INTELLIJ_LINK_CLASS}" data-path="$1" title="Open file in RubyMine"></a>$2`,
         flags: 'g'
     },
     {

@@ -25,11 +25,11 @@ div.preview {
     max-width: 90vw;
 }
 
-a.betterpreview[href$='.png'], a.betterpreview[href$='.mp4'] {
+a.better-preview[href$='.png'], a.better-preview[href$='.mp4'] {
     border-bottom: 1px dashed;
 }
 
-a.betterpreview:hover {
+a.better-preview:hover {
     text-decoration: none;
     border-bottom: 1px solid;
 }
