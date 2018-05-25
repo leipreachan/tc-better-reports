@@ -8,6 +8,7 @@
 const CANARY = 'canary',
     PREVIEW_CLASS_BEFORE = 'better',
     PREVIEW_CLASS_AFTER = 'betterpreview',
+    INTELLIJ_LINK_CLASS = 'better-intellij-link'
     MEDIA_PNG = 'png',
     MEDIA_MP4 = 'mp4';
 
@@ -31,8 +32,8 @@ const OVERVIEW_TRANSFORMS = [
     },
     {
         // language=JSRegexp
-        from: '(features\/[\\w_\/]+\.feature:\\d+)',
-        to: '<code>$1</code>',
+        from: '(?:\\.\\/)?([\\.\\w_\\/]+:\\d+)\\:in',
+        to: `<code>$1</code><a href="#" class="${INTELLIJ_LINK_CLASS}" data-path="$1" title="Open file in IDE"></a>`,
         flags: 'g'
     },
     {
@@ -201,6 +202,15 @@ function select_code(event) {
     }
 }
 
+function open_in_intellij(event) {
+    const link = `http://localhost:63342/api/file/${event.target.dataset.path}`
+
+    const req = new XMLHttpRequest();
+    req.open("GET", link);
+    req.send();
+    event.preventDefault();
+}
+
 function transform_node_text(text, transformers) {
     transformers.forEach((item) => {
         let rex = new RegExp(item.from, item.flags);
@@ -236,6 +246,10 @@ function transform_mutated_nodes(transformer_class, rules, customizer) {
 
     Array.from(document.getElementsByTagName('code')).forEach((item) => {
         item.addEventListener('dblclick', select_code, false)
+    });
+    
+    Array.from(document.getElementsByClassName(INTELLIJ_LINK_CLASS)).forEach((item) => {
+        item.addEventListener('click', open_in_intellij, false)
     });
 }
 
