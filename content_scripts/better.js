@@ -38,14 +38,14 @@ const OVERVIEW_TRANSFORMS = [
     },
     {
         // language=JSRegexp
-        from: '((?:\.\/)?[\.\\w_\\/]+\.(?:rb|feature):\\d+)(:in)?',
+        from: '((?:\.\/)?[\.\\w-_\\/]+\.(?:rb|feature):\\d+)(:in)?',
         to: `<code>$1</code><a href="#" class="${INTELLIJ_LINK_CLASS}" data-port="${RUBYMINE_PORT}" data-path="$1" title="Open file in RubyMine"></a>$2`,
         flags: 'g'
     },
     {
         // language=JSRegexp
-        from: '((?:testlib|UTests)[\.\\w_\\/]+\.php:\\d+)',
-        to: `<code>$1</code><a href="#" class="${INTELLIJ_LINK_CLASS}" data-port="${PHPSTORM_PORT}" data-path="$1" title="Open file in PHPStorm"></a>`,
+        from: '(buildAgent\/work\/\\w+\/)([\.\\w-_\\/]+\.php[:(]\\d+[)]?)',
+        to: `$1<code>$2</code><a href="#" class="${INTELLIJ_LINK_CLASS}" data-port="${PHPSTORM_PORT}" data-path="$2" title="Open file in PHPStorm"></a>`,
         flags: 'g'
     },
     {
