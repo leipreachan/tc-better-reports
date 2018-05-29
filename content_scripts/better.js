@@ -12,6 +12,12 @@ const CANARY = 'canary',
     MEDIA_PNG = 'png',
     MEDIA_MP4 = 'mp4';
 
+const
+    INTELLIJ_HOST = 'localhost',
+    RUBYMINE_PORT = 63342,
+    PHPSTORM_PORT = 63342,
+    INTELLIJ_API = 'api/file/';
+
 const OVERVIEW_TRANSFORMS = [
     {
         name: 'linkify',
@@ -33,7 +39,13 @@ const OVERVIEW_TRANSFORMS = [
     {
         // language=JSRegexp
         from: '((?:\.\/)?[\.\\w_\\/]+\.(?:rb|feature):\\d+)(:in)?',
-        to: `<code>$1</code><a href="#" class="${INTELLIJ_LINK_CLASS}" data-path="$1" title="Open file in RubyMine"></a>$2`,
+        to: `<code>$1</code><a href="#" class="${INTELLIJ_LINK_CLASS}" data-port="${RUBYMINE_PORT}" data-path="$1" title="Open file in RubyMine"></a>$2`,
+        flags: 'g'
+    },
+    {
+        // language=JSRegexp
+        from: '((?:testlib|UTests)[\.\\w_\\/]+\.php:\\d+)',
+        to: `<code>$1</code><a href="#" class="${INTELLIJ_LINK_CLASS}" data-port="${PHPSTORM_PORT}" data-path="$1" title="Open file in PHPStorm"></a>`,
         flags: 'g'
     },
     {
@@ -203,7 +215,9 @@ function select_code(event) {
 }
 
 function open_in_intellij(event) {
-    const link = `http://localhost:63342/api/file/${event.target.dataset.path}`
+    const link = `http://${INTELLIJ_HOST}:${event.target.dataset.port}/${INTELLIJ_API}${event.target.dataset.path}`;
+
+    console.debug('better.js link', link);
 
     const req = new XMLHttpRequest();
     req.open("GET", link);
