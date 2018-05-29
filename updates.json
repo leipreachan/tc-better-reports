@@ -33,6 +33,10 @@
         {
           "version": "0.1.0",
           "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.1.0/tc_better_reports-0.1.0-an.fx.xpi"
+        },
+        {
+          "version": "0.1.1",
+          "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.1.1/tc_better_reports-0.1.1-an.fx.xpi"
         }
       ]
     }
