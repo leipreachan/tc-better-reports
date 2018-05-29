@@ -9,7 +9,8 @@
   * everything like `phpunit anything.php` will be transformed to `<code>phpunit anything.php</code>`
   * everything like `bundle exec ...` will be transformed to `<code>bundle exec .. </code>`
   * everything like `docker-compose run ...` will be transformed to `<code>docker-compose run .. </code>`
-  * everything like `features/anything/anything(.rb|.feature):32` will be transformed to `<code>features/anything/anything:32</code><a>open the file in your IDE</a>` *
+  * everything like `./anything/filename(.rb|.feature):32` will be transformed to `<code>./anything/filename:32</code><a>open the file in your IDE</a>` *
+  * everything like `buildAgent/buildhash/path/filename.php:42` will be transformed to `<code>buildAgent/buildhash/path/filename.php:42</code><a>open the file in your IDE</a>` *
   * everything like `features/anything/anything:32` will be transformed to `<code>features/anything/anything:32</code>`
   * `User:? \d+` is transformed to `User:? <code>$1</code>`
   * [chrome://extensions/](chrome://extensions/) => Developer mode (v) => Update extensions now
