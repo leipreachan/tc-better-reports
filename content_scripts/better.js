@@ -9,13 +9,14 @@ const CANARY = 'canary',
     PREVIEW_CLASS_BEFORE = 'better',
     PREVIEW_CLASS_AFTER = 'better-preview',
     INTELLIJ_LINK_CLASS = 'better-intellij-link',
+    BOLT = 'bolt',
     MEDIA_PNG = 'png',
     MEDIA_MP4 = 'mp4';
 
 const
     INTELLIJ_HOST = 'localhost',
-    RUBYMINE_PORT = 63342,
-    PHPSTORM_PORT = 63342,
+    RUBYMINE_PORT = 63342, //63340
+    PHPSTORM_PORT = 63342, //63343
     INTELLIJ_API = 'api/file/';
 
 const OVERVIEW_TRANSFORMS = [
@@ -39,13 +40,13 @@ const OVERVIEW_TRANSFORMS = [
     {
         // language=JSRegexp
         from: '((?:\.\/)?[\.\\w-_\\/]+\.(?:rb|feature):\\d+)(:in)?',
-        to: `<code>$1</code><a href="#" class="${INTELLIJ_LINK_CLASS}" data-port="${RUBYMINE_PORT}" data-path="$1" title="Open file in RubyMine"></a>$2`,
+        to: `<code>$1</code><a href="#" class="${INTELLIJ_LINK_CLASS} ${BOLT}" data-port="${RUBYMINE_PORT}" data-path="$1" title="Open file in RubyMine"></a>$2`,
         flags: 'g'
     },
     {
         // language=JSRegexp
         from: '(buildAgent\/work\/\\w+\/)([\.\\w-_\\/]+\.php[:(]\\d+[)]?)',
-        to: `$1<code>$2</code><a href="#" class="${INTELLIJ_LINK_CLASS}" data-port="${PHPSTORM_PORT}" data-path="$2" title="Open file in PHPStorm"></a>`,
+        to: `$1<code>$2</code><a href="#" class="${INTELLIJ_LINK_CLASS} ${BOLT}" data-port="${PHPSTORM_PORT}" data-path="$2" title="Open file in PHPStorm"></a>`,
         flags: 'g'
     },
     {
@@ -57,6 +58,12 @@ const OVERVIEW_TRANSFORMS = [
     {
         from: '(User:? +)(\\d+)',
         to: '$1<code>$2</code>',
+        flags: 'g'
+    },
+    {
+        // language=RegExp
+        from: "(.+)((?:Given|And|When|Then) .+) # <[^>]+>([^:]+:\\d+)<\\/[^>]+>",
+        to: `$1<a href="#" class="${INTELLIJ_LINK_CLASS}" data-port="${RUBYMINE_PORT}" data-path="$3" title="Open file in RubyMine">$2</a>`,
         flags: 'g'
     }
 ];

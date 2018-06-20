@@ -44,11 +44,11 @@ a.better-preview:hover {
     padding: 2px;
 }
 
-.better-intellij-link:hover {
+.better-intellij-link.bolt:hover {
     text-decoration: none;
 }
 
-.better-intellij-link::after {
+.better-intellij-link.bolt::after {
     margin: 0 .5em;
     content: "\21af";
     background-color: #e5f4ff;
@@ -56,6 +56,6 @@ a.better-preview:hover {
     padding: 0 0.4em;
 }
 
-.better-intellij-link:hover::after {
+.better-intellij-link.bolt:hover::after {
     background-color: rgb(180, 223, 255);
 }
