@@ -6,8 +6,7 @@
 // TODO: add options for preloading (maybe?)
 
 const CANARY = 'canary',
-    PREVIEW_CLASS_BEFORE = 'better',
-    PREVIEW_CLASS_AFTER = 'better-preview',
+    PREVIEW_CLASS = 'better-preview',
     INTELLIJ_LINK_CLASS = 'better-intellij-link',
     BOLT = 'bolt',
     MEDIA_PNG = 'png',
@@ -19,34 +18,30 @@ const
     PHPSTORM_PORT = 63342, //63343
     INTELLIJ_API = 'api/file/';
 
+const
+    STACKTRACE_CLASS = 'fullStacktrace';
+
 const OVERVIEW_TRANSFORMS = [
-    {
-        name: 'linkify',
-        // language=JSRegexp
-        from: '(https?:\/\/(?:[\\w:\.]+\@)?(?:\\w[-\\w\.]+)(?::\\d{1,5})?(?:\/(?:[\\w#\/_\.!=:-]*(?:\\?\\S+)?)?)?)(\\s+)',
-        to: `<a href="$1" target="_blank" class="${PREVIEW_CLASS_BEFORE}">$1</a>$2`,
-        flags: 'g'
-    },
     {
         from: '&gt;&gt;(.+?)&lt;&lt;',
         to: '&gt;&gt;<code>$1</code>&lt;&lt;',
         flags: 'g'
     },
     {
-        from: "((phpunit|bundle.exec|docker-compose.run|./docker_droid.sh).+)\n",
+        from: "((?:phpunit|bundle.exec|docker.compose.run|..docker.droid.sh|APP=).+?)(?:\n|<br>)",
         to: "<code>$1</code>\n",
         flags: 'g'
     },
     {
         // language=JSRegexp
         from: '((?:\.\/)?[\.\\w-_\\/]+\.(?:rb|feature):\\d+)(:in)?',
-        to: `<code>$1</code><a href="#" class="${INTELLIJ_LINK_CLASS} ${BOLT}" data-port="${RUBYMINE_PORT}" data-path="$1" title="Open file in RubyMine"></a>$2`,
+        to: `<code>$1</code><a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS} ${BOLT}" data-port="${RUBYMINE_PORT}" data-path="$1" title="Open file in RubyMine"></a>$2`,
         flags: 'g'
     },
     {
         // language=JSRegexp
         from: '(buildAgent\/work\/\\w+\/)([\.\\w-_\\/]+\.php[:(]\\d+[)]?)',
-        to: `$1<code>$2</code><a href="#" class="${INTELLIJ_LINK_CLASS} ${BOLT}" data-port="${PHPSTORM_PORT}" data-path="$2" title="Open file in PHPStorm"></a>`,
+        to: `$1<code>$2</code><a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS} ${BOLT}" data-port="${PHPSTORM_PORT}" data-path="$2" title="Open file in PHPStorm"></a>`,
         flags: 'g'
     },
     {
@@ -56,14 +51,14 @@ const OVERVIEW_TRANSFORMS = [
         flags: 'g'
     },
     {
-        from: '(User:? +)(\\d+)',
+        from: '(User(?: ID)?:? +)(\\d+)',
         to: '$1<code>$2</code>',
         flags: 'g'
     },
     {
         // language=RegExp
-        from: "(.+)((?:Given|And|When|Then) .+) # <[^>]+>([^:]+:\\d+)<\\/[^>]+>",
-        to: `$1<a href="#" class="${INTELLIJ_LINK_CLASS}" data-port="${RUBYMINE_PORT}" data-path="$3" title="Open file in RubyMine">$2</a>`,
+        from: "(.+)((?:Given|And|When|Then) .+?) # <[^>]+>([^:]+:\\d+)<\\/[^>]+>",
+        to: `$1<a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS}" data-port="${RUBYMINE_PORT}" data-path="$3" title="Open file in RubyMine">$2</a>`,
         flags: 'g'
     }
 ];
@@ -80,10 +75,10 @@ const TRANSFORM_RULES = [
     {
         // address_pattern: 'tab=buildResultsDiv',
         id: 'buildResults',
-        transformer_class: 'fullStacktrace',
+        transformer_class: STACKTRACE_CLASS,
         rule_set: OVERVIEW_TRANSFORMS,
         customizer: () => {
-            const previews = document.getElementsByClassName(PREVIEW_CLASS_BEFORE);
+            const previews = document.querySelectorAll(`.${STACKTRACE_CLASS} a:not(.${PREVIEW_CLASS})`);
             // console.debug('better.js', `${previews.length} elements to be transformed`);
             Array.from(previews).forEach((item) => {
                 if (item.previewtype === undefined) {
@@ -96,7 +91,7 @@ const TRANSFORM_RULES = [
                         item.addEventListener('click', toggle_media_preview, false);
                     }
                 }
-                item.classList.replace(PREVIEW_CLASS_BEFORE, PREVIEW_CLASS_AFTER);
+                item.classList.add(PREVIEW_CLASS);
             });
         }
     },
@@ -171,7 +166,7 @@ function create_media_preview(event) {
     };
 
     if (is_known_type(type) && target.previewId === undefined) {
-        console.debug('better.js: create preview');
+        // console.debug('better.js: create preview');
         const preview_container = create_preview_container(target);
         const media = create_media(type, target.href);
 
@@ -183,7 +178,7 @@ function create_media_preview(event) {
 }
 
 function toggle_media_preview(event) {
-    console.debug('better.js: toggle preview');
+    // console.debug('better.js: toggle preview');
     const target = event.target;
     const type = get_media_type(target);
     const preview_container = document.getElementById(target.previewId);
@@ -224,7 +219,7 @@ function select_code(event) {
 function open_in_intellij(event) {
     const link = `http://${INTELLIJ_HOST}:${event.target.dataset.port}/${INTELLIJ_API}${event.target.dataset.path}`;
 
-    console.debug('better.js link', link);
+    // console.debug('better.js link', link);
 
     const req = new XMLHttpRequest();
     req.open("GET", link);

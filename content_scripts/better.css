@@ -30,7 +30,7 @@ a.better-preview[href$='.png'], a.better-preview[href$='.mp4'] {
 }
 
 a.better-preview:hover {
-    text-decoration: none;
+    text-decoration: none !important;
     border-bottom: 1px solid;
 }
 
@@ -45,7 +45,7 @@ a.better-preview:hover {
 }
 
 .better-intellij-link.bolt:hover {
-    text-decoration: none;
+    text-decoration: none !important;
 }
 
 .better-intellij-link.bolt::after {
@@ -54,8 +54,10 @@ a.better-preview:hover {
     background-color: #e5f4ff;
     border-radius: .5em;
     padding: 0 0.4em;
+    text-decoration: none !important;
 }
 
 .better-intellij-link.bolt:hover::after {
+    text-decoration: none !important;
     background-color: rgb(180, 223, 255);
 }
