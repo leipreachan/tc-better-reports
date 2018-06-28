@@ -1,6 +1,6 @@
 ## Features
 
-* ~~it transforms links in TC reports into proper `<a>` tag~~ << removed in version 0.2.0, will be optional starting from 0.2.1
+* ~~it transforms links in TC reports into proper `<a>` tag~~ << removed in version 0.2.0, will appear back again as optional setting starting from 0.2.5
 * a click on a link to an image / mp4 file will show you a preview with media content
   * large screenshots will be resized to fit the screen. You can zoom-in / zoom-out them.
 * it adds `<code>` nodes:
