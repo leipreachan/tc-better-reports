@@ -57,7 +57,7 @@ const OVERVIEW_TRANSFORMS = [
     },
     {
         // language=RegExp
-        from: "(.+)((?:Given|And|When|Then) .+?) # <[^>]+>([^:]+:\\d+)<\\/[^>]+>",
+        from: '(<br>(?:\\s+)|(?:\\w+\\s+=&gt;\\s+))((?:Given|And|When|Then).+?)#(?:[^<]+<[^>]+>)?([^:]+:\\d+)(?:<\\/[^>]+>)?',
         to: `$1<a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS}" data-port="${RUBYMINE_PORT}" data-path="$3" title="Open file in RubyMine">$2</a>`,
         flags: 'g'
     }
