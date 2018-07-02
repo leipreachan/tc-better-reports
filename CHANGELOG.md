@@ -6,6 +6,16 @@
 
 * something like `>>https://link<<` is parsed in a wrong way:(
 
+### 0.2.5
+
+Long time no see. I forgot to keep CHANGELOG updated :)
+
+* 0.2.5 added Preferences
+* 0.2.0 linkification removed from enabled transformations -- as it's available in TC 2018.1
+* 0.1.0 you can now open \*.php files in PHPStorm (or any other Intellij IDE)
+* 0.1.0 you can now open \*.rb and \*.feature files in RubyMine (or any other Intellij IDE)
+
+
 ### 0.0.23
 
 * minor CSS improvements
