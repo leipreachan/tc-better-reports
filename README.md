@@ -1,6 +1,5 @@
 ## Features
 
-* ~~it transforms links in TC reports into proper `<a>` tag~~ << removed in version 0.2.0, will appear back again as optional setting starting from 0.2.5
 * a click on a link to an image / mp4 file will show you a preview with media content
   * large screenshots will be resized to fit the screen. You can zoom-in / zoom-out them.
 * it adds `<code>` nodes:
@@ -14,6 +13,8 @@
   * everything like `features/anything/anything:32` will be transformed to `<code>features/anything/anything:32</code>`
   * `User:? \d+` is transformed to `User:? <code>$1</code>`
   * [chrome://extensions/](chrome://extensions/) => Developer mode (v) => Update extensions now
+* it transforms links in TC reports into proper `<a>` tag (optional, OFF by default)
+* you can control transformations via Preferences
 
 [Firefox](https://github.com/leipreachan/tc-better-reports/releases) |
 [Google Chrome](https://chrome.google.com/webstore/detail/tc-better-reports/idddfkaoefamlflojibpncamdcbnddpk)
