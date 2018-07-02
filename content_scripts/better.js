@@ -5,71 +5,18 @@
 // TODO: there should be only one default TRANSFORM_RULE as all the others will be ignored
 // TODO: add options for preloading (maybe?)
 
-const CANARY = 'canary',
-    PREVIEW_CLASS = 'better-preview',
-    INTELLIJ_LINK_CLASS = 'better-intellij-link',
-    BOLT = 'bolt',
-    MEDIA_PNG = 'png',
-    MEDIA_MP4 = 'mp4';
-
-const
-    INTELLIJ_HOST = 'localhost',
-    RUBYMINE_PORT = 63342, //63340
-    PHPSTORM_PORT = 63342, //63343
-    INTELLIJ_API = 'api/file/';
-
 const
     STACKTRACE_CLASS = 'fullStacktrace';
 
-const OVERVIEW_TRANSFORMS = [
-    {
-        from: '&gt;&gt;(.+?)&lt;&lt;',
-        to: '&gt;&gt;<code>$1</code>&lt;&lt;',
-        flags: 'g'
-    },
-    {
-        from: "((?:phpunit|bundle.exec|docker.compose.run|..docker.droid.sh|APP=).+?)(?:\n|<br>)",
-        to: "<code>$1</code>\n",
-        flags: 'g'
-    },
-    {
-        // language=JSRegexp
-        from: '((?:\.\/)?[\.\\w-_\\/]+\.(?:rb|feature):\\d+)(:in)?',
-        to: `<code>$1</code><a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS} ${BOLT}" data-port="${RUBYMINE_PORT}" data-path="$1" title="Open file in RubyMine"></a>$2`,
-        flags: 'g'
-    },
-    {
-        // language=JSRegexp
-        from: '(buildAgent\/work\/\\w+\/)([\.\\w-_\\/]+\.php[:(]\\d+[)]?)',
-        to: `$1<code>$2</code><a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS} ${BOLT}" data-port="${PHPSTORM_PORT}" data-path="$2" title="Open file in PHPStorm"></a>`,
-        flags: 'g'
-    },
-    {
-        // language=JSRegexp
-        from: '(User: +)(\\d+)([ \/]+)(\\w+\@[\\w.]+)([ \/]+)(\\w+)',
-        to: '$1<code>$2</code>$3<code>$4</code>$5<code>$6</code>',
-        flags: 'g'
-    },
-    {
-        from: '(User(?: ID)?:? +)(\\d+)',
-        to: '$1<code>$2</code>',
-        flags: 'g'
-    },
-    {
-        // language=RegExp
-        from: '(<br>(?:\\s+)|(?:\\w+\\s+=&gt;\\s+))((?:Given|And|When|Then).+?)#(?:[^<]+<[^>]+>)?([^:]+:\\d+)(?:<\\/[^>]+>)?',
-        to: `$1<a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS}" data-port="${RUBYMINE_PORT}" data-path="$3" title="Open file in RubyMine">$2</a>`,
-        flags: 'g'
-    }
-];
+const
+    INTELLIJ_HOST = 'localhost',
+    INTELLIJ_API = 'api/file/';
 
-const BUILDLOG_TRANSFORMS = [
-    {
-        from: '(features\/[\\w_\/\.: ]+)',
-        to: '<code>$1</code>',
-        flags: 'g'
-    },
-];
+let
+    overview_map = {},
+    buildlog_map = {};
+
+const DEFAULT_MAX_HEIGHT = '80vh';
 
 const TRANSFORM_RULES = [
     {
@@ -103,7 +50,39 @@ const TRANSFORM_RULES = [
         customizer: null
     }];
 
-const DEFAULT_MAX_HEIGHT = '80vh';
+function initialize_rule_set() {
+    function create_map(array_of_rules) {
+        let result = {};
+        array_of_rules.forEach((item, key) => {
+            result[encodeURIComponent(item.to)] = key;
+        });
+        return result;
+    }
+
+    function setCurrentChoice(result) {
+        overview_map = create_map(OVERVIEW_TRANSFORMS);
+        buildlog_map = create_map(BUILDLOG_TRANSFORMS);
+
+        result.settings.forEach((item) => {
+            if (item.id in IDE_PORTS) {
+                IDE_PORTS[item.id] = item.value;
+            }
+            if (item.id in overview_map) {
+                OVERVIEW_TRANSFORMS[overview_map[item.id]].enabled = item.checked;
+            }
+            if (item.id in buildlog_map) {
+                BUILDLOG_TRANSFORMS[buildlog_map[item.id]].enabled = item.checked;
+            }
+        });
+    }
+
+    function onError(error) {
+        console.log(`Error loading settings: ${error}`);
+    }
+
+    let getting = browser.storage.local.get(null);
+    getting.then(setCurrentChoice, onError);
+}
 
 function get_media_type(element) {
     return element.previewtype || '';
@@ -217,7 +196,8 @@ function select_code(event) {
 }
 
 function open_in_intellij(event) {
-    const link = `http://${INTELLIJ_HOST}:${event.target.dataset.port}/${INTELLIJ_API}${event.target.dataset.path}`;
+    const port = IDE_PORTS[event.target.dataset.ide];
+    const link = `http://${INTELLIJ_HOST}:${port}/${INTELLIJ_API}${event.target.dataset.path}`;
 
     // console.debug('better.js link', link);
 
@@ -229,8 +209,10 @@ function open_in_intellij(event) {
 
 function transform_node_text(text, transformers) {
     transformers.forEach((item) => {
-        let rex = new RegExp(item.from, item.flags);
-        text = text.replace(rex, item.to);
+        if (!('enabled' in item && item.enabled === false)) {
+            let rex = new RegExp(item.from, item.flags);
+            text = text.replace(rex, item.to);
+        }
     });
     return text;
 }
@@ -282,6 +264,7 @@ if (typeof window !== "object") {
         return;
     }
     window.hasBetterReports = true;
+    initialize_rule_set();
 
     let observers = [];
 
