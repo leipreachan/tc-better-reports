@@ -1,12 +1,12 @@
 code {
-    background-color: rgba(220, 220, 220, .5);
+    background-color: rgb(241, 241, 241);
     border-radius: 3px;
     box-decoration-break: clone;
     font-family: Menlo, "Bitstream Vera Sans Mono", "Ubuntu Mono", "Courier New", Courier, consolas, "Liberation Mono", monospace;
-    padding: 0.2em;
+    padding: 0.1em;
     word-wrap: break-word;
     border: 1px dotted #c0c0c0;
-    line-height: 2em;
+    line-height: 1.65em;
 }
 
 div.preview {
@@ -25,12 +25,12 @@ div.preview {
     max-width: 90vw;
 }
 
-a.betterpreview[href$='.png'], a.betterpreview[href$='.mp4'] {
+a.better-preview[href$='.png'], a.better-preview[href$='.mp4'] {
     border-bottom: 1px dashed;
 }
 
-a.betterpreview:hover {
-    text-decoration: none;
+a.better-preview:hover {
+    text-decoration: none !important;
     border-bottom: 1px solid;
 }
 
@@ -42,4 +42,22 @@ a.betterpreview:hover {
     border: 1px dotted #c0c0c0;
     border-radius: 3px;
     padding: 2px;
+}
+
+.better-intellij-link.bolt:hover {
+    text-decoration: none !important;
+}
+
+.better-intellij-link.bolt::after {
+    margin: 0 .5em;
+    content: "\21af";
+    background-color: #e5f4ff;
+    border-radius: .5em;
+    padding: 0 0.4em;
+    text-decoration: none !important;
+}
+
+.better-intellij-link.bolt:hover::after {
+    text-decoration: none !important;
+    background-color: rgb(180, 223, 255);
 }

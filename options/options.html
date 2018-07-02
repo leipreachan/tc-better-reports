@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TC-better-report settings</title>
+    <style>
+        label {
+            display: block;
+        }
+
+        .reset {
+            border-radius: 2px;
+            padding: 5px 8px;
+            font-size: 13px;
+            color: #0c0c0d;
+            background-color: rgba(12, 12, 13, 0.1);
+            min-width: 132px;
+            height: 32px;
+            border-width: 0;
+        }
+
+        .reset:hover {
+            background-color: rgba(12, 12, 13, 0.2);
+        }
+
+        .reset:focus {
+            box-shadow: 0 0 0 1px #0a84ff inset, 0 0 0 1px #0a84ff, 0 0 0 4px rgba(10, 132, 255, 0.3);
+        }
+
+        .wrapper {
+            display: grid;
+            grid-template-columns: 1fr 5fr;
+        }
+    </style>
+</head>
+<body>
+
+<form>
+    <h3>Enabled transformations of Overview page</h3>
+    <p id="overview"></p>
+
+    <h3>Enabled transformations of BuildLog page</h3>
+    <p id="buildlog"></p>
+
+    <h3>IDE port settings</h3>
+    <p>If you use PHPStorm and Rubymine you might want to change these settings:</p>
+    <div class="wrapper">
+    <div><label for="phpstorm">PHPStorm's port:</label></div><div><input type="text" id="phpstorm" class="setting"/></div>
+    <div><label for="rubymine">Rubymine's port:</label></div><div><input type="text" id="rubymine" class="setting"></div>
+    </div>
+    <br>
+    <input type="submit" value="Reset to Default" class="reset"/>
+</form>
+<script src="/content_scripts/browser-polyfill.min.js"></script>
+<script src="/content_scripts/common.js"></script>
+<script src="/options/options.js"></script>
+</body>
+</html>

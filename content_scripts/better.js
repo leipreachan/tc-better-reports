@@ -5,75 +5,27 @@
 // TODO: there should be only one default TRANSFORM_RULE as all the others will be ignored
 // TODO: add options for preloading (maybe?)
 
-const CANARY = 'canary',
-    PREVIEW_CLASS_BEFORE = 'better',
-    PREVIEW_CLASS_AFTER = 'betterpreview',
-    MEDIA_PNG = 'png',
-    MEDIA_MP4 = 'mp4';
+const
+    STACKTRACE_CLASS = 'fullStacktrace';
 
-const OVERVIEW_TRANSFORMS = [
-    {
-        name: 'linkify',
-        // language=JSRegexp
-        from: '(https?:\/\/(?:[\\w:\.]+\@)?(?:\\w[-\\w\.]+)(?::\\d{1,5})?(?:\/(?:[\\w#\/_\.!=:-]*(?:\\?\\S+)?)?)?)(\\s+)',
-        to: `<a href="$1" target="_blank" class="${PREVIEW_CLASS_BEFORE}">$1</a>$2`,
-        flags: 'g'
-    },
-    {
-        from: '&gt;&gt;(.+?)&lt;&lt;',
-        to: '&gt;&gt;<code>$1</code>&lt;&lt;',
-        flags: 'g'
-    },
-    {
-        from: "(phpunit +.+)\n",
-        to: "<code>$1</code>\n",
-        flags: 'g'
-    },
-    {
-        from: "(bundle +exec +.+)\n",
-        to: "<code>$1</code>\n",
-        flags: 'g'
-    },
-    {
-        // language=JSRegexp
-        from: '(features\/[\\w_\/]+\.feature:\\d+)',
-        to: '<code>$1</code>',
-        flags: 'g'
-    },
-    {
-        from: "(docker-compose run.+)\n",
-        to: "<code>$1</code>\n",
-        flags: 'g'
-    },
-    {
-        // language=JSRegexp
-        from: '(User: +)(\\d+)([ \/]+)(\\w+\@[\\w.]+)([ \/]+)(\\w+)',
-        to: '$1<code>$2</code>$3<code>$4</code>$5<code>$6</code>',
-        flags: 'g'
-    },
-    {
-        from: '(User:? +)(\\d+)',
-        to: '$1<code>$2</code>',
-        flags: 'g'
-    }
-];
+const
+    INTELLIJ_HOST = 'localhost',
+    INTELLIJ_API = 'api/file/';
 
-const BUILDLOG_TRANSFORMS = [
-    {
-        from: '(features\/[\\w_\/\.: ]+)',
-        to: '<code>$1</code>',
-        flags: 'g'
-    },
-];
+let
+    overview_map = {},
+    buildlog_map = {};
+
+const DEFAULT_MAX_HEIGHT = '80vh';
 
 const TRANSFORM_RULES = [
     {
         // address_pattern: 'tab=buildResultsDiv',
         id: 'buildResults',
-        transformer_class: 'fullStacktrace',
+        transformer_class: STACKTRACE_CLASS,
         rule_set: OVERVIEW_TRANSFORMS,
         customizer: () => {
-            const previews = document.getElementsByClassName(PREVIEW_CLASS_BEFORE);
+            const previews = document.querySelectorAll(`.${STACKTRACE_CLASS} a:not(.${PREVIEW_CLASS})`);
             // console.debug('better.js', `${previews.length} elements to be transformed`);
             Array.from(previews).forEach((item) => {
                 if (item.previewtype === undefined) {
@@ -86,7 +38,7 @@ const TRANSFORM_RULES = [
                         item.addEventListener('click', toggle_media_preview, false);
                     }
                 }
-                item.classList.replace(PREVIEW_CLASS_BEFORE, PREVIEW_CLASS_AFTER);
+                item.classList.add(PREVIEW_CLASS);
             });
         }
     },
@@ -98,7 +50,39 @@ const TRANSFORM_RULES = [
         customizer: null
     }];
 
-const DEFAULT_MAX_HEIGHT = '80vh';
+function initialize_rule_set() {
+    function create_map(array_of_rules) {
+        let result = {};
+        array_of_rules.forEach((item, key) => {
+            result[encodeURIComponent(item.to)] = key;
+        });
+        return result;
+    }
+
+    function setCurrentChoice(result) {
+        overview_map = create_map(OVERVIEW_TRANSFORMS);
+        buildlog_map = create_map(BUILDLOG_TRANSFORMS);
+
+        result.settings.forEach((item) => {
+            if (item.id in IDE_PORTS) {
+                IDE_PORTS[item.id] = item.value;
+            }
+            if (item.id in overview_map) {
+                OVERVIEW_TRANSFORMS[overview_map[item.id]].enabled = item.checked;
+            }
+            if (item.id in buildlog_map) {
+                BUILDLOG_TRANSFORMS[buildlog_map[item.id]].enabled = item.checked;
+            }
+        });
+    }
+
+    function onError(error) {
+        console.log(`Error loading settings: ${error}`);
+    }
+
+    let getting = browser.storage.local.get(null);
+    getting.then(setCurrentChoice, onError);
+}
 
 function get_media_type(element) {
     return element.previewtype || '';
@@ -161,7 +145,7 @@ function create_media_preview(event) {
     };
 
     if (is_known_type(type) && target.previewId === undefined) {
-        console.debug('better.js: create preview');
+        // console.debug('better.js: create preview');
         const preview_container = create_preview_container(target);
         const media = create_media(type, target.href);
 
@@ -173,7 +157,7 @@ function create_media_preview(event) {
 }
 
 function toggle_media_preview(event) {
-    console.debug('better.js: toggle preview');
+    // console.debug('better.js: toggle preview');
     const target = event.target;
     const type = get_media_type(target);
     const preview_container = document.getElementById(target.previewId);
@@ -211,10 +195,24 @@ function select_code(event) {
     }
 }
 
+function open_in_intellij(event) {
+    const port = IDE_PORTS[event.target.dataset.ide];
+    const link = `http://${INTELLIJ_HOST}:${port}/${INTELLIJ_API}${event.target.dataset.path}`;
+
+    // console.debug('better.js link', link);
+
+    const req = new XMLHttpRequest();
+    req.open("GET", link);
+    req.send();
+    event.preventDefault();
+}
+
 function transform_node_text(text, transformers) {
     transformers.forEach((item) => {
-        let rex = new RegExp(item.from, item.flags);
-        text = text.replace(rex, item.to);
+        if (!('enabled' in item && item.enabled === false)) {
+            let rex = new RegExp(item.from, item.flags);
+            text = text.replace(rex, item.to);
+        }
     });
     return text;
 }
@@ -247,6 +245,10 @@ function transform_mutated_nodes(transformer_class, rules, customizer) {
     Array.from(document.getElementsByTagName('code')).forEach((item) => {
         item.addEventListener('dblclick', select_code, false)
     });
+    
+    Array.from(document.getElementsByClassName(INTELLIJ_LINK_CLASS)).forEach((item) => {
+        item.addEventListener('click', open_in_intellij, false)
+    });
 }
 
 // unit tests
@@ -262,6 +264,7 @@ if (typeof window !== "object") {
         return;
     }
     window.hasBetterReports = true;
+    initialize_rule_set();
 
     let observers = [];
 
