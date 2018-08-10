@@ -32,6 +32,10 @@ const TRANSFORM_RULES = [
                     const href = item.getAttribute('href');
                     const matcher = href.match(/\.(\w{1,4})$/);
                     item.previewtype = matcher && matcher[1] ? matcher[1] : '';
+                    // teamcity's bug
+                    if (item.previewtype === 'zip' && item.innerText.indexOf('!/') > 0) {
+                        item.href = item.innerText;
+                    } else
                     if (item.previewtype.length > 0) {
                         item.addEventListener('mouseover', create_media_preview, false);
                         item.addEventListener('focus', create_media_preview, false);

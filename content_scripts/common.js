@@ -64,6 +64,13 @@ const OVERVIEW_TRANSFORMS = [
         from: '(<br>(?:\\s+)|(?:\\w+\\s+=&gt;\\s+))((?:Given|And|When|Then).+?)#(?:[^<]+<[^>]+>)?([^:]+:\\d+)(?:<\\/[^>]+>)?',
         to: `$1<a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS}" data-port="rubymine" data-path="$3" title="Open file with RubyMine">$2</a>`,
         flags: 'g'
+    },
+    {
+        desc: 'A Teamcity\'s bug -- it breaks internal file links ending with .zip',
+    //     language=RegExp
+        from: '(\.zip)(</a>)(!\/.+?)(<br>)',
+        to: `$1$3$2$4`,
+        flags: 'g'
     }
 ];
 
