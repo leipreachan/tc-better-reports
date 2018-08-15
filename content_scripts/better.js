@@ -44,6 +44,12 @@ const TRANSFORM_RULES = [
                 }
                 item.classList.add(PREVIEW_CLASS);
             });
+
+            const code_breakers = document.querySelectorAll('code > span');
+            Array.from(code_breakers).forEach(item => {
+                let text = document.createTextNode(item.textContent.trim());
+                item.parentNode.replaceChild(text, item);
+            });
         }
     },
     {
