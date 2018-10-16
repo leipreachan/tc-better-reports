@@ -77,8 +77,8 @@ const OVERVIEW_TRANSFORMS = [
 const BUILDLOG_TRANSFORMS = [
     {
         desc: 'Highlight a string with files from directory features/*',
-        from: '(features\/[\\w_\/\.: ]+)',
-        to: '<code>$1</code>',
+        from: '([\\w_/]+)?(features\/[\\w_\/\.: ]+)',
+        to: '<code>$1$2</code>',
         flags: 'g'
     },
 ];

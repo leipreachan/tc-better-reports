@@ -268,12 +268,43 @@ if (typeof window !== "object") {
     };
 }
 
+function loader()
+{
+    let loader;
+    if (window.betterJSLoader) {
+        console.debug('better.js: loader exists');
+        loader = window.betterJSLoader;
+    } else {
+        console.debug('better.js: to create loader');
+        loader = document.createElement('div');
+        loader.style.position = 'fixed';
+        loader.style.top = '5px';
+        loader.style.left = '5px';
+        loader.id = 'betterjs-loader';
+        let animation = document.createElement('div');
+        animation.classList.add('cssload-loader');
+        loader.appendChild(animation);
+        document.body.appendChild(loader);
+        window.betterJSLoader = loader;
+    }
+}
+
+function hide_loader()
+{
+    if (window.betterJSLoader) {
+        let loader = window.betterJSLoader;
+        loader.parentNode.removeChild(loader);
+        window.betterJSLoader = false;
+    }
+}
+
 (function () {
 
     if (typeof window !== "object" || window.hasBetterReports) {
         return;
     }
     window.hasBetterReports = true;
+    window.betterJSLoader = false;
     initialize_rule_set();
 
     let observers = [];
@@ -297,10 +328,12 @@ if (typeof window !== "object") {
 
 // create an observer instance
         let observer = new MutationObserver((mutations) => {
+            loader();
             mutations.forEach((mutation) => {
                 // console.debug('better.js mutation', mutation);
                 transform_mutated_nodes(node.transformer_class, node.rule_set, node.customizer)
             });
+            window.setTimeout(hide_loader, 500);
         });
 
 // pass in the target node, as well as the observer options
