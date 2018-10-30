@@ -10,9 +10,12 @@ const IDE_PORTS = {
     phpstorm: 63342
 };
 
+let TEST_SUCCESS_RATE = true;
+
 const OVERVIEW_TRANSFORMS = [
     {
         desc: 'Linkification -- transform link like https?://... to <a>https://...</a>',
+        name: 'linkify',
         // language=JSRegexp
         from: '(https?:\/\/(?:[\\w:\.]+\@)?(?:\\w[-\\w\.]+)(?::\\d{1,5})?(?:\/(?:[\\w#\/_\.!=:-]*(?:\\?\\S+)?)?)?)(\\s+)',
         to: '<a href="$1" target="_blank">$1</a>$2',
@@ -82,3 +85,10 @@ const BUILDLOG_TRANSFORMS = [
         flags: 'g'
     },
 ];
+
+// unit tests
+if (typeof window !== "object") {
+    module.exports = {
+        OVERVIEW_TRANSFORMS
+    };
+}

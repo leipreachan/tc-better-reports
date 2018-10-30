@@ -18,7 +18,7 @@ function save_options(e) {
 }
 
 function set_defaults() {
-    function create_option(item) {
+    function create_option(item, parentNode) {
         const label = document.createElement('label');
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
@@ -30,6 +30,7 @@ function set_defaults() {
         const desc = document.createTextNode(' ' + item.desc);
         label.appendChild(checkbox);
         label.appendChild(desc);
+        parentNode.appendChild(label);
         return label;
     }
 
@@ -37,8 +38,7 @@ function set_defaults() {
     {
         const transform_block = document.getElementById(transformBlockName);
         ruleSet.forEach((item) => {
-            const label = create_option(item);
-            transform_block.appendChild(label);
+            create_option(item, transform_block);
         });
     }
 
@@ -47,6 +47,9 @@ function set_defaults() {
 
     document.getElementById('phpstorm').value = IDE_PORTS.phpstorm;
     document.getElementById('rubymine').value = IDE_PORTS.rubymine;
+
+    create_option({to: 'sparkline', desc: "Show sparkline of tests' success rate", enabled: TEST_SUCCESS_RATE},
+        document.getElementById('moreFeatures'));
     // console.log('set_defaults - done');
 }
 

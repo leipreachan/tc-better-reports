@@ -61,3 +61,23 @@ a.better-preview:hover {
     text-decoration: none !important;
     background-color: rgb(180, 223, 255);
 }
+
+svg > .red-bar {
+    fill:red;
+    stroke-width:1;
+    stroke: red;
+    opacity:0.5;
+}
+
+svg > .green-bar {
+    fill:#4da400;
+    stroke-width:1;
+    stroke: #4da400;
+    opacity:0.5;
+}
+
+svg > .current {
+    fill:#FF0800;
+    stroke-width:1;
+    stroke: #FF0800;
+}

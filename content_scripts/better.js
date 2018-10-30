@@ -50,6 +50,10 @@ const TRANSFORM_RULES = [
                 let text = document.createTextNode(item.textContent.trim());
                 item.parentNode.replaceChild(text, item);
             });
+
+            if (TEST_SUCCESS_RATE) {
+                draw_sparkline();
+            }
         }
     },
     {
@@ -59,6 +63,115 @@ const TRANSFORM_RULES = [
         rule_set: BUILDLOG_TRANSFORMS,
         customizer: null
     }];
+
+const attrs = (node, attributes) => {
+    for (let index in attributes) {
+        node.setAttribute(index, attributes[index]);
+    }
+    return node;
+};
+
+async function makeRequest(method, url) {
+    return new Promise(function (resolve, reject) {
+        let xhr = new XMLHttpRequest();
+        xhr.open(method, url);
+        xhr.onload = function () {
+            if (this.status >= 200 && this.status < 300) {
+                resolve(xhr);
+            } else {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            }
+        };
+        xhr.onerror = function () {
+            reject({
+                status: this.status,
+                statusText: xhr.statusText
+            });
+        };
+        xhr.send();
+    });
+}
+
+async function draw_sparkline() {
+
+    async function retrieveTestResults(testId)
+    {
+        const
+            fetchUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/app/rest/testOccurrences?locator=test:${testId},count:1000`;
+
+        /*
+        const response = await fetch(fetchUrl, {
+                method: "GET", // *GET, POST, PUT, DELETE, etc.
+            });
+        const text = await response.text();
+        return text;*/
+
+        let result = '';
+        try {
+            const response = await makeRequest('GET', fetchUrl);
+            result = response.responseXML;
+        } catch (e) {}
+        return result;
+    }
+
+    function addRectangles(xmlTestResult, currentBuild, svgNode)
+    {
+        let testResults = Array.from(xmlTestResult.getElementsByTagName('testOccurrence'));
+        let x=0, step=5; width=5;
+        testResults.forEach((item) => {
+            let rect = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'rect'), {x, width});
+            if (item.attributes.status.nodeValue === 'SUCCESS') {
+                attrs(rect, {y: 5, height: 3, class: "green-bar"});
+            } else {
+                // check if this is the opened build
+                if (item.attributes.id.nodeValue.includes(`(id:${currentBuild})`)) {
+                    attrs(rect, {y: 0, height: 13, class: "current"});
+                } else {
+                    attrs(rect, {y: 3, height: 7, class: "red-bar"});
+                }
+            }
+            svgNode.appendChild(rect);
+            x+=step;
+        });
+    }
+
+    const stacktraces = document.querySelectorAll(`.${STACKTRACE_CLASS}:not([data-sparkline])`);
+
+    if (stacktraces.length === 0) {
+        return;
+    }
+
+    const nodes = Array.from(stacktraces);
+
+    // console.debug('sparkline');
+    for (let index in nodes) {
+        let item = nodes[index];
+        let matches = /fullStacktrace_\d+_([\d-]+)/.exec(item.id);
+        let testId = matches[1];
+        item.dataset.sparkline = testId;
+
+        const parentNode = item.parentNode;
+        const wrapper = parentNode.insertBefore(document.createElement('div'), parentNode.firstChild);
+        attrs(wrapper, {
+            // title: 'Test History',
+            style: 'display:block; width:100%; height:15px;',
+            // href: `http://mainci.msk:8111/project.html?projectId=BadooWebApplicationSelenium_BillingTests&testNameId=${testId}&tab=testDetails`
+        });
+
+        const svg = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), {
+            'data-type': 'sparkline',
+            style: 'display:block; width:100%; height:13px;'
+        });
+
+        let result = await retrieveTestResults(testId);
+        let current_build = /buildId=(\d+)/.exec(window.location.search);
+        addRectangles(result, current_build[1], svg);
+        wrapper.appendChild(svg);
+    }
+}
 
 function initialize_rule_set() {
     function create_map(array_of_rules) {
@@ -83,6 +196,9 @@ function initialize_rule_set() {
             if (item.id in buildlog_map) {
                 BUILDLOG_TRANSFORMS[buildlog_map[item.id]].enabled = item.checked;
             }
+            if (item.id === 'sparkline') {
+                TEST_SUCCESS_RATE = item.checked;
+            }
         });
     }
 
@@ -106,11 +222,8 @@ function create_media_preview(event) {
     const target = event.target;
     const type = get_media_type(target);
     const create_preview_container = (opener) => {
-        let preview_container = document.createElement('div');
-        preview_container.setAttribute('class', 'preview');
         let id = (new Date()).toJSON();
-        preview_container.setAttribute('id', id);
-        return preview_container;
+        return attrs(document.createElement('div'), {class: 'preview', id});
     };
 
     const toggle_image_zoom = (event) => {
@@ -143,12 +256,8 @@ function create_media_preview(event) {
                 });
                 break;
             case MEDIA_MP4:
-                media = document.createElement('video');
-                media.setAttribute('controls', 'true');
-                media.setAttribute('preload', 'metadata');
-                media.setAttribute('playsinline', 'true');
-                media.setAttribute('height', '438px');
-                media.setAttribute('src', src);
+                media = attrs(document.createElement('video'),
+                    {controls: true, preload: 'metadata', playsinline: true, height: '438px', src});
                 break;
         }
         return media;
@@ -194,7 +303,7 @@ function select_code(event) {
     if (document.execCommand('copy')) {
         const copybox = document.createElement('div');
         copybox.innerText = 'Copied!';
-        copybox.setAttribute('id', 'copybox');
+        attrs(copybox, {id: 'copybox'});
         document.body.appendChild(copybox);
         let boundingClientRect = target.getBoundingClientRect();
         copybox.style.top = boundingClientRect.top + boundingClientRect.height + window.scrollY + 2 + 'px';
@@ -230,9 +339,7 @@ function transform_node_text(text, transformers) {
 function transform_mutated_nodes(transformer_class, rules, customizer) {
 
     const insert_canary_node = (item) => {
-        const test = document.createElement('span');
-        test.setAttribute('class', CANARY);
-        item.appendChild(test);
+        item.appendChild(attrs(document.createElement('span'), {class: CANARY}));
     };
 
     const transform_block = (item, rules) => {
@@ -255,7 +362,7 @@ function transform_mutated_nodes(transformer_class, rules, customizer) {
     Array.from(document.getElementsByTagName('code')).forEach((item) => {
         item.addEventListener('dblclick', select_code, false)
     });
-    
+
     Array.from(document.getElementsByClassName(INTELLIJ_LINK_CLASS)).forEach((item) => {
         item.addEventListener('click', open_in_intellij, false)
     });
@@ -272,10 +379,10 @@ function loader()
 {
     let loader;
     if (window.betterJSLoader) {
-        console.debug('better.js: loader exists');
+        // console.debug('better.js: loader exists');
         loader = window.betterJSLoader;
     } else {
-        console.debug('better.js: to create loader');
+        // console.debug('better.js: to create loader');
         loader = document.createElement('div');
         loader.style.position = 'fixed';
         loader.style.top = '5px';
