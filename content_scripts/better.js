@@ -119,12 +119,14 @@ async function draw_sparkline() {
 
     function addRectangles(xmlTestResult, currentBuild, svgNode)
     {
+        const step=5, width=5;
         let testResults = Array.from(xmlTestResult.getElementsByTagName('testOccurrence'));
-        let x=0, step=5; width=5;
+        let x=0, success=0;
         testResults.forEach((item) => {
             let rect = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'rect'), {x, width});
             if (item.attributes.status.nodeValue === 'SUCCESS') {
                 attrs(rect, {y: 5, height: 3, class: "green-bar"});
+                success++;
             } else {
                 // check if this is the opened build
                 if (item.attributes.id.nodeValue.includes(`(id:${currentBuild})`)) {
@@ -136,6 +138,10 @@ async function draw_sparkline() {
             svgNode.appendChild(rect);
             x+=step;
         });
+        let rate=success*100/testResults.length;
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.innerHTML = `Success rate: ${rate}%`;
+        svgNode.appendChild(attrs(text, {x: x+step*2, y:11}));
     }
 
     const stacktraces = document.querySelectorAll(`.${STACKTRACE_CLASS}:not([data-sparkline])`);
