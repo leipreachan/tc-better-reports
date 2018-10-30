@@ -15,6 +15,7 @@
   * [chrome://extensions/](chrome://extensions/) => Developer mode (v) => Update extensions now
 * it transforms links in TC reports into proper `<a>` tag (optional, OFF by default)
 * you can control transformations via Preferences
+* it shows a sparkline of the test's successful / unsuccessful runs next to its name
 
 [Firefox](https://github.com/leipreachan/tc-better-reports/releases) |
 [Google Chrome](https://chrome.google.com/webstore/detail/tc-better-reports/idddfkaoefamlflojibpncamdcbnddpk)
