@@ -97,10 +97,10 @@ async function makeRequest(method, url) {
 
 async function draw_sparkline() {
 
-    async function retrieveTestResults(testId)
+    async function retrieveTestResults(testId, numberOfPoints = 200)
     {
         const
-            fetchUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/app/rest/testOccurrences?locator=test:${testId},count:1000`;
+            fetchUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/app/rest/testOccurrences?locator=test:${testId},count:${numberOfPoints}`;
 
         /*
         const response = await fetch(fetchUrl, {
@@ -156,7 +156,7 @@ async function draw_sparkline() {
         const parentNode = item.parentNode;
         const wrapper = parentNode.insertBefore(document.createElement('div'), parentNode.firstChild);
         attrs(wrapper, {
-            // title: 'Test History',
+            title: 'Test History',
             style: 'display:block; width:100%; height:15px;',
             // href: `http://mainci.msk:8111/project.html?projectId=BadooWebApplicationSelenium_BillingTests&testNameId=${testId}&tab=testDetails`
         });
