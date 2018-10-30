@@ -6,6 +6,14 @@
 
 * something like `>>https://link<<` is parsed in a wrong way:(
 
+### 0.2.7
+
+We show a sparkline of the test's successful / unsuccessful runs next to its name
+
+### 0.2.6
+
+I don't remember what was in the version, but I was sure it needed a new version
+
 ### 0.2.5
 
 Long time no see. I forgot to keep CHANGELOG updated :)
