@@ -72,6 +72,8 @@ const attrs = (node, attributes) => {
 };
 
 async function makeRequest(method, url) {
+    // console.log(`better.js fetch ${url}`);
+
     return new Promise(function (resolve, reject) {
         let xhr = new XMLHttpRequest();
         xhr.open(method, url);
@@ -95,20 +97,15 @@ async function makeRequest(method, url) {
     });
 }
 
-async function draw_sparkline() {
+function draw_sparkline() {
 
-    async function retrieveTestResults(testId, numberOfPoints = 200)
+    const numberOfPoints = 200;
+    const tcEntryPoint = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/app/rest/testOccurrences`;
+    const currentBuildId = (/buildId=(\d+)/.exec(window.location.search))[1];
+    const currentBuildType = (/buildTypeId=(\w+)/.exec(window.location.search))[1];
+
+    async function retrieveTestResults(fetchUrl)
     {
-        const
-            fetchUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/app/rest/testOccurrences?locator=test:${testId},count:${numberOfPoints}`;
-
-        /*
-        const response = await fetch(fetchUrl, {
-                method: "GET", // *GET, POST, PUT, DELETE, etc.
-            });
-        const text = await response.text();
-        return text;*/
-
         let result = '';
         try {
             const response = await makeRequest('GET', fetchUrl);
@@ -117,7 +114,7 @@ async function draw_sparkline() {
         return result;
     }
 
-    function addRectangles(xmlTestResult, currentBuild, svgNode)
+    function addRectangles(xmlTestResult, currentBuildId, svgNode, title = '')
     {
         const step=5, width=5;
         let testResults = Array.from(xmlTestResult.getElementsByTagName('testOccurrence'));
@@ -129,19 +126,58 @@ async function draw_sparkline() {
                 success++;
             } else {
                 // check if this is the opened build
-                if (item.attributes.id.nodeValue.includes(`(id:${currentBuild})`)) {
+                if (item.attributes.id.nodeValue.includes(`(id:${currentBuildId})`)) {
                     attrs(rect, {y: 0, height: 13, class: "current"});
                 } else {
                     attrs(rect, {y: 3, height: 7, class: "red-bar"});
                 }
             }
+            let buildDate = item.firstChild.firstChild.textContent;
+            let t=/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(buildDate);
+            let rect_title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+            rect_title.innerHTML = `${t[1]}-${t[2]}-${t[3]} ${t[4]}:${t[5]}:${t[6]}`;
+            rect.appendChild(rect_title);
             svgNode.appendChild(rect);
             x+=step;
         });
-        let rate=success*100/testResults.length;
+        let rate=(success*100/testResults.length).toString().substr(0, 5);
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.innerHTML = `Success rate: ${rate}%`;
+        title = title || 'Success rate';
+        text.innerHTML = `${title}: ${rate}%`;
         svgNode.appendChild(attrs(text, {x: x+step*2, y:11}));
+    }
+
+    async function drawSVGFromUrl(wrapper, fetchUrl, title)
+    {
+        const svg = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), {
+            'data-type': 'sparkline',
+            style: 'display:block; width:100%; height:13px;'
+        });
+
+        let result = await retrieveTestResults(fetchUrl);
+        addRectangles(result, currentBuildId, svg, title);
+        wrapper.appendChild(svg);
+        return true;
+    }
+
+    function reDrawSpark()
+    {
+        const testId = this.dataset.testId,
+            buildType = this.dataset.buildType;
+
+        const
+            testResultsUrl = `${tcEntryPoint}?fields=testOccurrence(id,status,href,build(buildTypeId,startDate))&locator=test:${testId},count:${numberOfPoints}`;
+
+        // http://mainci.msk:8111/app/rest/testOccurrences?locator=test:-2359191317800676667,count:200&fields=testOccurrence(id,status,build(buildTypeId,startDate))
+
+        if (this.firstChild) this.removeChild(this.firstChild);
+
+        if (this.globalStat) {
+            drawSVGFromUrl(this, testResultsUrl, 'Success rate');
+        } else {
+            drawSVGFromUrl(this, `${testResultsUrl},buildType:${buildType}`, 'Success rate (configuration)');
+        }
+        this.globalStat = !this.globalStat;
     }
 
     const stacktraces = document.querySelectorAll(`.${STACKTRACE_CLASS}:not([data-sparkline])`);
@@ -161,21 +197,13 @@ async function draw_sparkline() {
 
         const parentNode = item.parentNode;
         const wrapper = parentNode.insertBefore(document.createElement('div'), parentNode.firstChild);
-        attrs(wrapper, {
-            title: 'Test History',
-            style: 'display:block; width:100%; height:15px;',
-            // href: `http://mainci.msk:8111/project.html?projectId=BadooWebApplicationSelenium_BillingTests&testNameId=${testId}&tab=testDetails`
-        });
+        attrs(wrapper, {style: 'display:block; width:100%; height:25px;'});
+        wrapper.globalStat = true;
+        wrapper.dataset.testId = testId;
+        wrapper.dataset.buildType = currentBuildType;
 
-        const svg = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), {
-            'data-type': 'sparkline',
-            style: 'display:block; width:100%; height:13px;'
-        });
-
-        let result = await retrieveTestResults(testId);
-        let current_build = /buildId=(\d+)/.exec(window.location.search);
-        addRectangles(result, current_build[1], svg);
-        wrapper.appendChild(svg);
+        wrapper.onclick = reDrawSpark;
+        wrapper.click();
     }
 }
 
@@ -381,7 +409,7 @@ if (typeof window !== "object") {
     };
 }
 
-function loader()
+function loader(parent = null)
 {
     let loader;
     if (window.betterJSLoader) {
@@ -390,14 +418,14 @@ function loader()
     } else {
         // console.debug('better.js: to create loader');
         loader = document.createElement('div');
-        loader.style.position = 'fixed';
-        loader.style.top = '5px';
-        loader.style.left = '5px';
-        loader.id = 'betterjs-loader';
+        if (parent === null) {
+            attrs(loader, {id: 'betterjs-loader', style: 'position: fixed; top: 5px; left: 5px'});
+            parent = document.body;
+        }
         let animation = document.createElement('div');
         animation.classList.add('cssload-loader');
         loader.appendChild(animation);
-        document.body.appendChild(loader);
+        parent.appendChild(loader);
         window.betterJSLoader = loader;
     }
 }

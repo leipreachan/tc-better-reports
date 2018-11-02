@@ -66,14 +66,14 @@ svg > .red-bar {
     fill:red;
     stroke-width:1;
     stroke: red;
-    opacity:0.5;
+    opacity:0.3;
 }
 
 svg > .green-bar {
     fill:#4da400;
     stroke-width:1;
     stroke: #4da400;
-    opacity:0.5;
+    opacity:0.3;
 }
 
 svg > .current {
