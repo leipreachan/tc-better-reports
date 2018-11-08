@@ -114,23 +114,21 @@ async function makeRequest(method, url) {
 function draw_sparkline() {
     const tcEntryPoint = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/app/rest/testOccurrences`;
     const currentBuildId = (/buildId=(\d+)/.exec(window.location.search))[1];
-    const currentBuildType = (/buildTypeId=(\w+)/.exec(window.location.search))[1];
 
-    async function retrieveTestResults(fetchUrl)
-    {
+    async function retrieveTestResults(fetchUrl) {
         let result = '';
         try {
             const response = await makeRequest('GET', fetchUrl);
             result = response.responseXML;
-        } catch (e) {}
+        } catch (e) {
+        }
         return result;
     }
 
-    function addRectangles(xmlTestResult, currentBuildId, svgNode, title = '')
-    {
-        const step=5, width=5;
+    function addRectangles(xmlTestResult, currentBuildId, svgNode, title = '') {
+        const step = 5, width = 5;
         let testResults = Array.from(xmlTestResult.getElementsByTagName('testOccurrence'));
-        let x=0, success=0;
+        let x = 0, success = 0;
         for (let i in testResults) {
             let item = testResults[i], value = item.attributes.status.nodeValue;
             let rect = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'rect'), {x, width});
@@ -150,22 +148,21 @@ function draw_sparkline() {
                     continue;
             }
             let buildDate = item.firstChild.firstChild.textContent;
-            let t=/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(buildDate);
+            let t = /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(buildDate);
             let rect_title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
             rect_title.innerHTML = `${t[1]}-${t[2]}-${t[3]} ${t[4]}:${t[5]}:${t[6]}`;
             rect.appendChild(rect_title);
             svgNode.appendChild(rect);
-            x+=step;
+            x += step;
         }
-        let rate=(success*100/testResults.length).toString().substr(0, 5);
+        let rate = (success * 100 / testResults.length).toString().substr(0, 5);
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         title = title || 'Success rate';
         text.innerHTML = `${title}: ${rate}%`;
-        svgNode.appendChild(attrs(text, {x: x+step*2, y:11}));
+        svgNode.appendChild(attrs(text, {x: x + step * 2, y: 11}));
     }
 
-    async function drawSVGFromUrl(wrapper, fetchUrl, title)
-    {
+    async function drawSVGFromUrl(wrapper, fetchUrl, title) {
         const svg = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), {'data-type': 'sparkline'});
 
         let result = await retrieveTestResults(fetchUrl);
@@ -174,10 +171,13 @@ function draw_sparkline() {
         return true;
     }
 
-    function reDrawSpark()
-    {
+    function reDrawSpark() {
         const testId = this.dataset.testId,
             buildType = this.dataset.buildType;
+
+        if (!this.globalStat && buildType.length === 0) {
+            return;
+        }
 
         const
             testResultsUrl = `${tcEntryPoint}?fields=testOccurrence(id,status,href,build(buildTypeId,startDate))&locator=test:${testId},ignored:false,count:${SPARKLINE_POINTS}`;
@@ -191,10 +191,15 @@ function draw_sparkline() {
         } else {
             drawSVGFromUrl(this, `${testResultsUrl},buildType:${buildType}`, 'Success rate (configuration)');
         }
+
         this.globalStat = !this.globalStat;
     }
 
     const stacktraces = document.querySelectorAll(`.${STACKTRACE_CLASS}:not([data-sparkline])`);
+    let currentBuildType = '';
+    if (url = (/buildTypeId=(\w+)/.exec(window.location.search))) {
+        currentBuildType = url[1];
+    }
 
     if (stacktraces.length === 0) {
         return;
@@ -423,8 +428,7 @@ if (typeof window !== "object") {
     };
 }
 
-function loader(parent = null)
-{
+function loader(parent = null) {
     let loader;
     if (window.betterJSLoader) {
         debug('loader exists');
@@ -446,8 +450,7 @@ function loader(parent = null)
     }
 }
 
-function hide_loader()
-{
+function hide_loader() {
     if (window.betterJSLoader) {
         let loader = window.betterJSLoader;
         loader.parentNode.removeChild(loader);
@@ -472,8 +475,7 @@ function hide_loader()
     });
 
     // nothing found, get the default one
-    if (nodes_filtered_by_addr.length === 0)
-    {
+    if (nodes_filtered_by_addr.length === 0) {
         nodes_filtered_by_addr = TRANSFORM_RULES.filter((node) => {
             return typeof node.address_pattern === 'undefined';
         });
