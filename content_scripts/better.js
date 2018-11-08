@@ -16,6 +16,9 @@ let
     overview_map = {},
     buildlog_map = {};
 
+const
+    SPARKLINE_POINTS = 200;
+
 const DEFAULT_MAX_HEIGHT = '80vh';
 
 const TRANSFORM_RULES = [
@@ -28,15 +31,14 @@ const TRANSFORM_RULES = [
             const previews = document.querySelectorAll(`.${STACKTRACE_CLASS} a:not(.${PREVIEW_CLASS})`);
             // console.debug('better.js', `${previews.length} elements to be transformed`);
             Array.from(previews).forEach((item) => {
-                if (item.previewtype === undefined) {
+                if (typeof item.previewtype === 'undefined') {
                     const href = item.getAttribute('href');
                     const matcher = href.match(/\.(\w{1,4})$/);
                     item.previewtype = matcher && matcher[1] ? matcher[1] : '';
                     // teamcity's bug
                     if (item.previewtype === 'zip' && item.innerText.indexOf('!/') > 0) {
                         item.href = item.innerText;
-                    } else
-                    if (item.previewtype.length > 0) {
+                    } else if (item.previewtype.length > 0) {
                         item.addEventListener('mouseover', create_media_preview, false);
                         item.addEventListener('focus', create_media_preview, false);
                         item.addEventListener('click', toggle_media_preview, false);
@@ -64,6 +66,18 @@ const TRANSFORM_RULES = [
         customizer: null
     }];
 
+// to enable debug messages use this snippet:
+// v=document.createElement('div'); v.id='betterDebug'; document.body.appendChild(v);
+const debug = (message, obj = null) => {
+    if (document.querySelectorAll('#betterDebug').length === 0)
+        return;
+    if (obj !== null) {
+        console.log(`better.js: ${message}`, obj);
+    } else {
+        console.log(`better.js: ${message}`);
+    }
+};
+
 const attrs = (node, attributes) => {
     for (let index in attributes) {
         node.setAttribute(index, attributes[index]);
@@ -72,7 +86,7 @@ const attrs = (node, attributes) => {
 };
 
 async function makeRequest(method, url) {
-    // console.log(`better.js fetch ${url}`);
+    debug(`fetch ${url}`);
 
     return new Promise(function (resolve, reject) {
         let xhr = new XMLHttpRequest();
@@ -98,8 +112,6 @@ async function makeRequest(method, url) {
 }
 
 function draw_sparkline() {
-
-    const numberOfPoints = 200;
     const tcEntryPoint = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/app/rest/testOccurrences`;
     const currentBuildId = (/buildId=(\d+)/.exec(window.location.search))[1];
     const currentBuildType = (/buildTypeId=(\w+)/.exec(window.location.search))[1];
@@ -119,18 +131,23 @@ function draw_sparkline() {
         const step=5, width=5;
         let testResults = Array.from(xmlTestResult.getElementsByTagName('testOccurrence'));
         let x=0, success=0;
-        testResults.forEach((item) => {
+        for (let i in testResults) {
+            let item = testResults[i], value = item.attributes.status.nodeValue;
             let rect = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'rect'), {x, width});
-            if (item.attributes.status.nodeValue === 'SUCCESS') {
-                attrs(rect, {y: 5, height: 3, class: "green-bar"});
-                success++;
-            } else {
-                // check if this is the opened build
-                if (item.attributes.id.nodeValue.includes(`(id:${currentBuildId})`)) {
-                    attrs(rect, {y: 0, height: 13, class: "current"});
-                } else {
-                    attrs(rect, {y: 3, height: 7, class: "red-bar"});
-                }
+            switch (value) {
+                case 'SUCCESS':
+                    attrs(rect, {y: 5, height: 3, class: "green-bar"});
+                    success++;
+                    break;
+                case 'FAILURE':
+                    if (item.attributes.id.nodeValue.includes(`(id:${currentBuildId})`)) {
+                        attrs(rect, {y: 0, height: 13, class: "current"});
+                    } else {
+                        attrs(rect, {y: 3, height: 7, class: "red-bar"});
+                    }
+                    break;
+                default:
+                    continue;
             }
             let buildDate = item.firstChild.firstChild.textContent;
             let t=/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(buildDate);
@@ -139,7 +156,7 @@ function draw_sparkline() {
             rect.appendChild(rect_title);
             svgNode.appendChild(rect);
             x+=step;
-        });
+        }
         let rate=(success*100/testResults.length).toString().substr(0, 5);
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         title = title || 'Success rate';
@@ -149,10 +166,7 @@ function draw_sparkline() {
 
     async function drawSVGFromUrl(wrapper, fetchUrl, title)
     {
-        const svg = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), {
-            'data-type': 'sparkline',
-            style: 'display:block; width:100%; height:13px;'
-        });
+        const svg = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), {'data-type': 'sparkline'});
 
         let result = await retrieveTestResults(fetchUrl);
         addRectangles(result, currentBuildId, svg, title);
@@ -166,7 +180,7 @@ function draw_sparkline() {
             buildType = this.dataset.buildType;
 
         const
-            testResultsUrl = `${tcEntryPoint}?fields=testOccurrence(id,status,href,build(buildTypeId,startDate))&locator=test:${testId},count:${numberOfPoints}`;
+            testResultsUrl = `${tcEntryPoint}?fields=testOccurrence(id,status,href,build(buildTypeId,startDate))&locator=test:${testId},ignored:false,count:${SPARKLINE_POINTS}`;
 
         // http://mainci.msk:8111/app/rest/testOccurrences?locator=test:-2359191317800676667,count:200&fields=testOccurrence(id,status,build(buildTypeId,startDate))
 
@@ -188,7 +202,7 @@ function draw_sparkline() {
 
     const nodes = Array.from(stacktraces);
 
-    // console.debug('sparkline');
+    debug('sparkline');
     for (let index in nodes) {
         let item = nodes[index];
         let matches = /fullStacktrace_\d+_([\d-]+)/.exec(item.id);
@@ -197,7 +211,7 @@ function draw_sparkline() {
 
         const parentNode = item.parentNode;
         const wrapper = parentNode.insertBefore(document.createElement('div'), parentNode.firstChild);
-        attrs(wrapper, {style: 'display:block; width:100%; height:25px;'});
+        wrapper.classList.add('sparkline-wrapper');
         wrapper.globalStat = true;
         wrapper.dataset.testId = testId;
         wrapper.dataset.buildType = currentBuildType;
@@ -237,7 +251,7 @@ function initialize_rule_set() {
     }
 
     function onError(error) {
-        console.log(`Error loading settings: ${error}`);
+        debug('Error loading settings', error);
     }
 
     let getting = browser.storage.local.get(null);
@@ -297,8 +311,8 @@ function create_media_preview(event) {
         return media;
     };
 
-    if (is_known_type(type) && target.previewId === undefined) {
-        // console.debug('better.js: create preview');
+    if (is_known_type(type) && typeof target.previewId === 'undefined') {
+        debug('create preview');
         const preview_container = create_preview_container(target);
         const media = create_media(type, target.href);
 
@@ -310,12 +324,12 @@ function create_media_preview(event) {
 }
 
 function toggle_media_preview(event) {
-    // console.debug('better.js: toggle preview');
+    debug('toggle preview');
     const target = event.target;
     const type = get_media_type(target);
     const preview_container = document.getElementById(target.previewId);
 
-    if (is_known_type(type) && target.previewId !== undefined) {
+    if (is_known_type(type) && typeof target.previewId !== 'undefined') {
         event.preventDefault();
         if (target.previewOpened) {
             preview_container.style.display = 'none';
@@ -352,7 +366,7 @@ function open_in_intellij(event) {
     const port = IDE_PORTS[event.target.dataset.ide];
     const link = `http://${INTELLIJ_HOST}:${port}/${INTELLIJ_API}${event.target.dataset.path}`;
 
-    // console.debug('better.js link', link);
+    debug(`link ${link}`);
 
     const req = new XMLHttpRequest();
     req.open("GET", link);
@@ -413,18 +427,20 @@ function loader(parent = null)
 {
     let loader;
     if (window.betterJSLoader) {
-        // console.debug('better.js: loader exists');
+        debug('loader exists');
         loader = window.betterJSLoader;
     } else {
-        // console.debug('better.js: to create loader');
+        debug('to create loader');
         loader = document.createElement('div');
+        // standard teamcity loader
+        loader.classList.add('ring-loader-inline');
         if (parent === null) {
-            attrs(loader, {id: 'betterjs-loader', style: 'position: fixed; top: 5px; left: 5px'});
+            loader.id = 'betterjs-loader-fixed';
             parent = document.body;
         }
-        let animation = document.createElement('div');
-        animation.classList.add('cssload-loader');
-        loader.appendChild(animation);
+        // let animation = document.createElement('div');
+        // animation.classList.add('cssload-loader');
+        // loader.appendChild(animation);
         parent.appendChild(loader);
         window.betterJSLoader = loader;
     }
@@ -452,14 +468,14 @@ function hide_loader()
 
     // filter by address matching
     let nodes_filtered_by_addr = TRANSFORM_RULES.filter((node) => {
-        return node.address_pattern !== undefined && location.search.match(node.address_pattern);
+        return typeof node.address_pattern !== 'undefined' && location.search.match(node.address_pattern);
     });
 
     // nothing found, get the default one
     if (nodes_filtered_by_addr.length === 0)
     {
         nodes_filtered_by_addr = TRANSFORM_RULES.filter((node) => {
-            return node.address_pattern === undefined;
+            return typeof node.address_pattern === 'undefined';
         });
     }
 
@@ -471,7 +487,7 @@ function hide_loader()
         let observer = new MutationObserver((mutations) => {
             loader();
             mutations.forEach((mutation) => {
-                // console.debug('better.js mutation', mutation);
+                debug('mutation', mutation);
                 transform_mutated_nodes(node.transformer_class, node.rule_set, node.customizer)
             });
             window.setTimeout(hide_loader, 500);
@@ -479,14 +495,14 @@ function hide_loader()
 
 // pass in the target node, as well as the observer options
         observer.observe(target, {attributes: true, childList: true, subtree: true, characterData: true});
-        console.debug(`better.js: observe ${node.id}, ${node.transformer_class}`);
+        debug(`observe ${node.id}, ${node.transformer_class}`);
         observers.push(observer);
     });
 
     window.onunload = () => {
         observers.forEach((item) => {
             item.disconnect();
-            console.debug('better.js: stop observing');
+            debug('stop observing');
         })
     };
 })();
