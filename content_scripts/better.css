@@ -80,18 +80,33 @@ a.better-preview:hover {
     height:15px;
 }
 
+svg > rect {
+    transition: all 200ms ease-in;
+    transform: scale(1);
+    transform-origin: center;
+    transform-box: fill-box;
+    opacity:0.3;
+}
+
+svg > rect:hover {
+    transition: all 200ms ease-in;
+    transform: scale(2,4);
+    transform-origin: center;
+    transform-box: fill-box;
+    opacity: 1;
+    cursor: pointer;
+}
+
 svg > .red-bar {
     fill:red;
     stroke-width:1;
     stroke: red;
-    opacity:0.3;
 }
 
 svg > .green-bar {
     fill:#4da400;
     stroke-width:1;
     stroke: #4da400;
-    opacity:0.3;
 }
 
 svg > .current {

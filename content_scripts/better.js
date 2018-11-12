@@ -14,7 +14,8 @@ const
 
 let
     overview_map = {},
-    buildlog_map = {};
+    buildlog_map = {},
+    teamcity_address = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
 
 const
     SPARKLINE_POINTS = 200;
@@ -112,7 +113,7 @@ async function makeRequest(method, url) {
 }
 
 function draw_sparkline() {
-    const tcEntryPoint = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/app/rest/testOccurrences`;
+    const tcEntryPoint = `${teamcity_address}/app/rest/testOccurrences`;
     const currentBuildId = (/buildId=(\d+)/.exec(window.location.search))[1];
 
     async function retrieveTestResults(fetchUrl) {
@@ -145,11 +146,12 @@ function draw_sparkline() {
                 default:
                     continue;
             }
-            if (buildInfo.id == currentBuildId) {
+            if (buildInfo.id === currentBuildId) {
                 titleBuildType = buildTypeName;
                 attrs(rect, {y: 0, height: 13});
                 rect.classList.add('current');
             }
+            rect.buildId = buildInfo.id;
             const buildDate = item.getElementsByTagName('startDate')[0].textContent,
                 buildBranchName = buildInfo.attributes.branchName.nodeValue,
                 t = /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(buildDate),
@@ -175,7 +177,13 @@ function draw_sparkline() {
         return true;
     }
 
-    function reDrawSpark() {
+    function reDrawSpark(event) {
+        debug('event', event);
+        if ((event.metaKey === true || event.altKey === true) && event.target.tagName === 'rect') {
+            window.open(`${teamcity_address}/viewLog.html?buildId=${event.target.buildId}#testNameId${this.dataset.testId}`);
+            return;
+        }
+
         const testId = this.dataset.testId,
             buildType = this.dataset.buildType;
 
