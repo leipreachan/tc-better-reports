@@ -126,31 +126,35 @@ function draw_sparkline() {
     }
 
     function addRectangles(xmlTestResult, currentBuildId, svgNode, title = '') {
-        const step = 5, width = 5;
-        let testResults = Array.from(xmlTestResult.getElementsByTagName('testOccurrence'));
-        let x = 0, success = 0;
+        const step = 5, width = 5, testResults = Array.from(xmlTestResult.getElementsByTagName('testOccurrence'));
+        let x = 0, success = 0, titleBuildType;
         for (let i in testResults) {
-            let item = testResults[i], value = item.attributes.status.nodeValue;
-            let rect = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'rect'), {x, width});
+            const item = testResults[i],
+                value = item.attributes.status.nodeValue,
+                buildInfo = item.getElementsByTagName('build')[0],
+                buildTypeName = item.getElementsByTagName('buildType')[0].attributes.name.nodeValue,
+                rect = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'rect'), {x, width});
             switch (value) {
                 case 'SUCCESS':
                     attrs(rect, {y: 5, height: 3, class: "green-bar"});
                     success++;
                     break;
                 case 'FAILURE':
-                    if (item.attributes.id.nodeValue.includes(`(id:${currentBuildId})`)) {
-                        attrs(rect, {y: 0, height: 13, class: "current"});
-                    } else {
-                        attrs(rect, {y: 3, height: 7, class: "red-bar"});
-                    }
+                    attrs(rect, {y: 3, height: 7, class: "red-bar"});
                     break;
                 default:
                     continue;
             }
-            let buildDate = item.firstChild.firstChild.textContent;
-            let t = /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(buildDate);
-            let rect_title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-            rect_title.innerHTML = `${t[1]}-${t[2]}-${t[3]} ${t[4]}:${t[5]}:${t[6]}`;
+            if (buildInfo.id == currentBuildId) {
+                titleBuildType = buildTypeName;
+                attrs(rect, {y: 0, height: 13});
+                rect.classList.add('current');
+            }
+            const buildDate = item.getElementsByTagName('startDate')[0].textContent,
+                buildBranchName = buildInfo.attributes.branchName.nodeValue,
+                t = /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(buildDate),
+                rect_title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+            rect_title.innerHTML = `${t[1]}-${t[2]}-${t[3]} ${t[4]}:${t[5]}:${t[6]}\n${buildTypeName}\nbranch: ${buildBranchName}`;
             rect.appendChild(rect_title);
             svgNode.appendChild(rect);
             x += step;
@@ -180,9 +184,7 @@ function draw_sparkline() {
         }
 
         const
-            testResultsUrl = `${tcEntryPoint}?fields=testOccurrence(id,status,href,build(buildTypeId,startDate))&locator=test:${testId},ignored:false,count:${SPARKLINE_POINTS}`;
-
-        // http://mainci.msk:8111/app/rest/testOccurrences?locator=test:-2359191317800676667,count:200&fields=testOccurrence(id,status,build(buildTypeId,startDate))
+            testResultsUrl = `${tcEntryPoint}?fields=testOccurrence(status,build(id,branchName,buildType(name),startDate))&locator=test:${testId},ignored:false,count:${SPARKLINE_POINTS}`;
 
         if (this.firstChild) this.removeChild(this.firstChild);
 

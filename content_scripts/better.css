@@ -95,7 +95,5 @@ svg > .green-bar {
 }
 
 svg > .current {
-    fill:#FF0800;
-    stroke-width:1;
-    stroke: #FF0800;
+    opacity: 1;
 }
