@@ -36,12 +36,23 @@ a.better-preview:hover {
 
 #copybox {
     position: absolute;
-    font-family: Menlo, "Bitstream Vera Sans Mono", "Ubuntu Mono", "Courier New", Courier, consolas, "Liberation Mono", monospace;
+    font-family: -apple-system, BlinkMacSystemFont, Ubuntu, "Helvetica Neue", Arial, sans-serif;
     background: #80C6FF;
     color: white;
     border: 1px dotted #c0c0c0;
     border-radius: 3px;
     padding: 2px;
+}
+
+#betterPopup {
+    position: absolute;
+    display: none;
+    font-family: -apple-system, BlinkMacSystemFont, Ubuntu, "Helvetica Neue", Arial, sans-serif;
+    background: white;
+    color: black;
+    border: 1px solid rgba(192, 192, 192, 0.22);
+    border-radius: 2px;
+    padding: 3px 5px;
 }
 
 .better-intellij-link.bolt:hover {

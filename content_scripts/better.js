@@ -116,6 +116,40 @@ function draw_sparkline() {
     const tcEntryPoint = `${teamcity_address}/app/rest/testOccurrences`;
     const currentBuildId = (/buildId=(\d+)/.exec(window.location.search))[1];
 
+    function showPopup(event)
+    {
+        let popup;
+        if (typeof document.sparklinepopup === 'undefined') {
+            popup = attrs(document.createElement('div'),{id: 'betterPopup'});
+            document.sparklinepopup = popup;
+        } else {
+            popup = document.sparklinepopup;
+        }
+        popup.innerHTML = '';
+        this.title.split(`\n`).forEach((item)=> {
+            const div=document.createElement('div');
+            div.appendChild(document.createTextNode(item));
+            popup.appendChild(div);
+        });
+
+        let boundingClientRect = event.target.getBoundingClientRect();
+        popup.style.top = boundingClientRect.top + boundingClientRect.height + window.scrollY + 7 + 'px';
+        popup.style.left = (event.pageX - popup.offsetWidth / 2) + 'px';
+
+        document.body.appendChild(popup);
+
+        setTimeout(() => {
+            document.sparklinepopup.style.display = 'block';
+        }, 200);
+    }
+
+    function hidePopup()
+    {
+        setTimeout(() => {
+            document.sparklinepopup.style.display = 'none';
+        }, 200);
+    }
+
     async function retrieveTestResults(fetchUrl) {
         let result = '';
         try {
@@ -154,10 +188,10 @@ function draw_sparkline() {
             rect.buildId = buildInfo.id;
             const buildDate = item.getElementsByTagName('startDate')[0].textContent,
                 buildBranchName = buildInfo.attributes.branchName.nodeValue,
-                t = /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(buildDate),
-                rect_title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-            rect_title.innerHTML = `${t[1]}-${t[2]}-${t[3]} ${t[4]}:${t[5]}:${t[6]}\n${buildTypeName}\nbranch: ${buildBranchName}`;
-            rect.appendChild(rect_title);
+                t = /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(buildDate);
+            rect.title = `${t[1]}-${t[2]}-${t[3]} ${t[4]}:${t[5]}:${t[6]}\n${buildTypeName}\nbranch: ${buildBranchName}`;
+            rect.onmouseover = showPopup;
+            rect.onmouseout = hidePopup;
             svgNode.appendChild(rect);
             x += step;
         }
