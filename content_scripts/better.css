@@ -46,13 +46,15 @@ a.better-preview:hover {
 
 #betterPopup {
     position: absolute;
-    display: none;
+    visibility: hidden;
     font-family: -apple-system, BlinkMacSystemFont, Ubuntu, "Helvetica Neue", Arial, sans-serif;
     background: white;
     color: black;
     border: 1px solid rgba(192, 192, 192, 0.22);
     border-radius: 2px;
     padding: 3px 5px;
+    z-index: 10;
+    box-shadow: 0 2px 8px 0 rgba(0, 42, 76, 0.15);
 }
 
 .better-intellij-link.bolt:hover {

@@ -116,37 +116,52 @@ function draw_sparkline() {
     const tcEntryPoint = `${teamcity_address}/app/rest/testOccurrences`;
     const currentBuildId = (/buildId=(\d+)/.exec(window.location.search))[1];
 
+    function getTestLink(buildId, testId)
+    {
+        return `${teamcity_address}/viewLog.html?buildId=${buildId}#testNameId${testId}`
+    }
+
     function showPopup(event)
     {
+        debug('hover event', event);
         let popup;
         if (typeof document.sparklinepopup === 'undefined') {
-            popup = attrs(document.createElement('div'),{id: 'betterPopup'});
+            popup = document.body.appendChild(attrs(document.createElement('div'),{id: 'betterPopup'}));
             document.sparklinepopup = popup;
         } else {
             popup = document.sparklinepopup;
+            popup.innerHTML = '';
         }
-        popup.innerHTML = '';
+        const timelink = attrs(document.createElement('a'), {href: getTestLink(this.buildId, this.parentNode.parentNode.dataset.testId), target:'_blank', title: 'Open this build in another tab'});
+        timelink.appendChild(document.createTextNode(`${this.titletime} »`));
+        popup.appendChild(timelink);
         this.title.split(`\n`).forEach((item)=> {
-            const div=document.createElement('div');
-            div.appendChild(document.createTextNode(item));
-            popup.appendChild(div);
+            const title=document.createElement('div');
+            title.appendChild(document.createTextNode(item));
+            popup.appendChild(title);
         });
 
         let boundingClientRect = event.target.getBoundingClientRect();
-        popup.style.top = boundingClientRect.top + boundingClientRect.height + window.scrollY + 7 + 'px';
-        popup.style.left = (event.pageX - popup.offsetWidth / 2) + 'px';
+        const top = boundingClientRect.top + boundingClientRect.height + window.scrollY + 10,
+            left = (event.pageX - popup.offsetWidth / 2);
+        popup.style.top = top + 'px';
+        popup.style.left = (left > 5 ? left : 5) + 'px';
 
-        document.body.appendChild(popup);
+        popup.onmouseover = () => {
+            window.clearTimeout(document.sparklinepopuptimeout);
+        };
+        popup.onmouseout = hidePopup;
 
         setTimeout(() => {
-            document.sparklinepopup.style.display = 'block';
+            if (document.sparklinepopuptimeout) window.clearTimeout(document.sparklinepopuptimeout);
+            document.sparklinepopup.style.visibility = 'visible';
         }, 200);
     }
 
     function hidePopup()
     {
-        setTimeout(() => {
-            document.sparklinepopup.style.display = 'none';
+        document.sparklinepopuptimeout = setTimeout(() => {
+            document.sparklinepopup.style.visibility = 'hidden';
         }, 200);
     }
 
@@ -189,7 +204,8 @@ function draw_sparkline() {
             const buildDate = item.getElementsByTagName('startDate')[0].textContent,
                 buildBranchName = buildInfo.attributes.branchName.nodeValue,
                 t = /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(buildDate);
-            rect.title = `${t[1]}-${t[2]}-${t[3]} ${t[4]}:${t[5]}:${t[6]}\n${buildTypeName}\nbranch: ${buildBranchName}`;
+            rect.titletime = `${t[1]}-${t[2]}-${t[3]} ${t[4]}:${t[5]}:${t[6]}`;
+            rect.title = `${buildTypeName}\nbranch: ${buildBranchName}`;
             rect.onmouseover = showPopup;
             rect.onmouseout = hidePopup;
             svgNode.appendChild(rect);
@@ -214,7 +230,7 @@ function draw_sparkline() {
     function reDrawSpark(event) {
         debug('event', event);
         if ((event.metaKey === true || event.altKey === true) && event.target.tagName === 'rect') {
-            window.open(`${teamcity_address}/viewLog.html?buildId=${event.target.buildId}#testNameId${this.dataset.testId}`);
+            window.open(getTestLink(event.target.buildId, this.dataset.testId));
             return;
         }
 
