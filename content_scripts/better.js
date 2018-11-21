@@ -194,7 +194,7 @@ function draw_sparkline() {
         let x = 0, success = 0, titleBuildType;
         for (let i in testResults) {
             const item = testResults[i],
-                value = item.attributes.status.nodeValue,
+                value = item.hasAttribute('status') ? item.attributes.status.nodeValue : '',
                 buildInfo = item.getElementsByTagName('build')[0],
                 buildTypeName = item.getElementsByTagName('buildType')[0].attributes.name.nodeValue,
                 rect = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'rect'), {x, width});
@@ -216,7 +216,7 @@ function draw_sparkline() {
             }
             rect.buildId = buildInfo.id;
             const buildDate = item.getElementsByTagName('startDate')[0].textContent,
-                buildBranchName = buildInfo.attributes.branchName.nodeValue,
+                buildBranchName = buildInfo.hasAttribute('branchName') ? buildInfo.attributes.branchName.nodeValue : '<empty>',
                 t = /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(buildDate);
             rect.titletime = `${t[1]}-${t[2]}-${t[3]} ${t[4]}:${t[5]}:${t[6]}`;
             rect.title = `${buildTypeName}\nbranch: ${buildBranchName}`;
