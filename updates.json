@@ -105,6 +105,10 @@
         {
           "version": "0.2.8.4",
           "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.2.8.4/tc_better_reports-0.2.8.4-an+fx.xpi"
+        },
+        {
+          "version": "0.2.8.5",
+          "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.2.8.5/tc_better_reports-0.2.8.5-an+fx.xpi"
         }
        ]
     }
