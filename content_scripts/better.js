@@ -89,6 +89,15 @@ const attrs = (node, attributes) => {
 async function makeRequest(method, url) {
     debug(`fetch ${url}`);
 
+    /*
+
+    add application/json to get values in JSON
+const response = await fetch(fetchUrl, {
+        method: "GET", // *GET, POST, PUT, DELETE, etc.
+    });
+const text = await response.text();
+return text;*/
+
     return new Promise(function (resolve, reject) {
         let xhr = new XMLHttpRequest();
         xhr.open(method, url);
@@ -132,6 +141,10 @@ function draw_sparkline() {
             popup = document.sparklinepopup;
             popup.innerHTML = '';
         }
+
+        if (this.classList.contains('red-bar')) {
+            popup.innerHTML = '<span class="svg-icon js_buildStatusIcon buildStatusIcon buildStatusIcon_error buildStatusIcon_size_S" style="display: inline-block; width: 12px; height: 12px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" height="100%" width="100%"><path d="M8 0a8 8 0 1 0 8 8 8 8 0 0 0-8-8zm0 13.94a1.42 1.42 0 1 1 1.42-1.41A1.42 1.42 0 0 1 8 13.94zM9.67 3.6l-.43 5.5a1.18 1.18 0 0 1-1.3 1 1.17 1.17 0 0 1-1.14-1l-.43-5.5A1.54 1.54 0 0 1 7.91 2a1.6 1.6 0 0 1 1.76 1.4z"></path></svg></span>';
+        }
         const timelink = attrs(document.createElement('a'), {href: getTestLink(this.buildId, this.parentNode.parentNode.dataset.testId), target:'_blank', title: 'Open this build in another tab'});
         timelink.appendChild(document.createTextNode(`${this.titletime} »`));
         popup.appendChild(timelink);
@@ -152,7 +165,7 @@ function draw_sparkline() {
         };
         popup.onmouseout = hidePopup;
 
-        setTimeout(() => {
+        document.sparklinepopuptimeout = window.setTimeout(() => {
             if (document.sparklinepopuptimeout) window.clearTimeout(document.sparklinepopuptimeout);
             document.sparklinepopup.style.visibility = 'visible';
         }, 200);
@@ -160,7 +173,8 @@ function draw_sparkline() {
 
     function hidePopup()
     {
-        document.sparklinepopuptimeout = setTimeout(() => {
+        window.clearTimeout(document.sparklinepopuptimeout);
+        document.sparklinepopuptimeout = window.setTimeout(() => {
             document.sparklinepopup.style.visibility = 'hidden';
         }, 200);
     }
