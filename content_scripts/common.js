@@ -25,27 +25,45 @@ const OVERVIEW_TRANSFORMS = [
     {
         desc: 'Transform >>xxx<< to <code>xxx</code>',
         from: '&gt;&gt;(.+?)&lt;&lt;',
-        to: '&gt;&gt;<code>$1</code>&lt;&lt;',
+        to: '&gt;&gt;<code data-type="square-brackets">$1</code>&lt;&lt;',
         flags: 'g'
     },
     {
-        desc: 'Highlight phpunit ..., bundle exec .., docker compose run .., ./docker_droid.sh, etc',
-        from: "((?:phpunit|bundle.exec|docker.compose.run|..docker.droid.sh|APP=).+?)(?:\n|<br>)",
-        to: "<code>$1</code>\n",
+        desc: 'Highlight phpunit ... ',
+        from: "((?:phpunit).+?)(?:\n|<br>)",
+        to: "<code data-type='phpunit'>$1</code>\n",
+        flags: 'g'
+    },
+    {
+        desc: 'Highlight docker compose run .., ./docker_droid.sh',
+        from: "((?:docker.compose.run|..docker.droid.sh).+?)(?:\n|<br>)",
+        to: "<code data-type='docker'>$1</code>\n",
+        flags: 'g'
+    },
+    {
+        desc: 'Highlight bundle exec .., APP=..., APP_BUNDLE_PATH=..., etc',
+        from: "((?:bundle.exec |APP=|APP_BUNDLE_PATH=).+?)(?:\n|<br>)",
+        to: "<code data-type='bundle_exec_app'>$1</code>\n",
+        flags: 'g'
+    },
+    {
+        desc: 'Highlight eval ...',
+        from: "((?:eval).+?)(?:\n|<br>)",
+        to: "<code data-type='eval'>$1</code>\n",
         flags: 'g'
     },
     {
         desc: 'Highlight *.rb and *.feature files and add IDE links next to them',
         // language=JSRegexp
         from: '((?:\.\/)?[\.\\w-_\\/]+\.(?:rb|feature):\\d+)(:in)?',
-        to: `<code>$1</code><a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS} ${BOLT}" data-ide="rubymine" data-path="$1" title="Open file with RubyMine"></a>$2`,
+        to: `<code data-type="features_and_rb">$1</code><a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS} ${BOLT}" data-ide="rubymine" data-path="$1" title="Open file with RubyMine"></a>$2`,
         flags: 'g'
     },
     {
         desc: 'Highlight buildAgent/work/*.php files and add IDE links next to them',
         // language=JSRegexp
         from: '(buildAgent\/work\/\\w+\/)([\.\\w-_\\/]+\.php[:(]\\d+[)]?)',
-        to: `$1<code>$2</code><a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS} ${BOLT}" data-ide="phpstorm" data-path="$2" title="Open file with PHPStorm"></a>`,
+        to: `$1<code data-type="files">$2</code><a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS} ${BOLT}" data-ide="phpstorm" data-path="$2" title="Open file with PHPStorm"></a>`,
         flags: 'g'
     },
     {
