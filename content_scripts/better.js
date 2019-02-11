@@ -291,7 +291,7 @@ function draw_sparkline() {
         const parentNode = item.parentNode;
         const wrapper = parentNode.insertBefore(document.createElement('div'), parentNode.firstChild);
         wrapper.classList.add('sparkline-wrapper');
-        wrapper.globalStat = true;
+        wrapper.globalStat = !CURRENT_BUILDTYPE_AS_DEFAULT;
         wrapper.dataset.testId = testId;
         wrapper.dataset.buildType = currentBuildType;
 
@@ -325,6 +325,9 @@ function initialize_rule_set() {
             }
             if (item.id === 'sparkline') {
                 TEST_SUCCESS_RATE = item.checked;
+            }
+            if (item.id === 'currentconfigurationbydefault') {
+                CURRENT_BUILDTYPE_AS_DEFAULT = item.checked;
             }
         });
     }

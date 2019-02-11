@@ -10,7 +10,9 @@ const IDE_PORTS = {
     phpstorm: 63342
 };
 
-let TEST_SUCCESS_RATE = true;
+let
+    TEST_SUCCESS_RATE = true,
+    CURRENT_BUILDTYPE_AS_DEFAULT = false;
 
 const OVERVIEW_TRANSFORMS = [
     {

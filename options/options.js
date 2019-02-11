@@ -50,6 +50,8 @@ function set_defaults() {
 
     create_option({to: 'sparkline', desc: "Show sparkline of tests' success rate", enabled: TEST_SUCCESS_RATE},
         document.getElementById('moreFeatures'));
+    create_option({to: 'currentconfigurationbydefault', desc: "Show sparkline for current build type by default first", enabled: CURRENT_BUILDTYPE_AS_DEFAULT},
+        document.getElementById('moreFeatures'));
     // console.log('set_defaults - done');
 }
 
