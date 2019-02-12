@@ -270,8 +270,9 @@ function draw_sparkline() {
     }
 
     const stacktraces = document.querySelectorAll(`.${STACKTRACE_CLASS}:not([data-sparkline])`);
-    let currentBuildType = '';
-    if (url = (/buildTypeId=(\w+)/.exec(window.location.search))) {
+    let currentBuildType = '',
+        url = (/buildTypeId=(\w+)/.exec(window.location.search))
+    if (url) {
         currentBuildType = url[1];
     }
 
@@ -291,7 +292,7 @@ function draw_sparkline() {
         const parentNode = item.parentNode;
         const wrapper = parentNode.insertBefore(document.createElement('div'), parentNode.firstChild);
         wrapper.classList.add('sparkline-wrapper');
-        wrapper.globalStat = !CURRENT_BUILDTYPE_AS_DEFAULT;
+        wrapper.globalStat = currentBuildType ? !CURRENT_BUILDTYPE_AS_DEFAULT : true;
         wrapper.dataset.testId = testId;
         wrapper.dataset.buildType = currentBuildType;
 
