@@ -234,10 +234,9 @@ function draw_sparkline() {
 
     async function drawSVGFromUrl(wrapper, fetchUrl, title) {
         const svg = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), {'data-type': 'sparkline'});
-
+        wrapper.appendChild(svg);
         let result = await retrieveTestResults(fetchUrl);
         addRectangles(result, currentBuildId, svg, title);
-        wrapper.appendChild(svg);
         return true;
     }
 
@@ -271,7 +270,7 @@ function draw_sparkline() {
 
     const stacktraces = document.querySelectorAll(`.${STACKTRACE_CLASS}:not([data-sparkline])`);
     let currentBuildType = '',
-        url = (/buildTypeId=(\w+)/.exec(window.location.search))
+        url = (/buildTypeId=(\w+)/.exec(window.location.search));
     if (url) {
         currentBuildType = url[1];
     }
