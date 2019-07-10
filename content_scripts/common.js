@@ -84,7 +84,7 @@ const OVERVIEW_TRANSFORMS = [
     {
         desc: 'Highlight Gherkin steps Given/When/Then/And followed by hash sign and link to file',
         // language=RegExp
-        from: '(<br>(?:\\s+)|(?:\\w+\\s+=&gt;\\s+))((?:Given|And|When|Then).+?)#(?:[^<]+<[^>]+>)?([^:]+:\\d+)(?:<\\/[^>]+>)?',
+        from: '(<br>(?:\\s+)|(?:\\w+\\s+=&gt;\\s+))((?:Given|And|When|Then|After hook)\s+.+?)#(?:[^<]+<[^>]+>)?([^:]+:\\d+)(?:<\\/[^>]+>)?',
         to: `$1<a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS}" data-port="rubymine" data-path="$3" title="Open file with RubyMine">$2</a>`,
         flags: 'g'
     },
