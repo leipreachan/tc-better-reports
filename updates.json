@@ -3,6 +3,10 @@
     "develhealthqa@badoo.com": {
       "updates": [
         {
+          "version": "0.0.9",
+          "update_link": "https://github.com/leipreachan/devel-health-qa/releases/download/0.0.9/devel_health_qa-0.0.9-an+fx.xpi"
+        },
+        {
           "version": "0.0.4",
           "update_link": "https://github.com/leipreachan/devel-health-qa/releases/download/0.0.4/devel_health_qa-0.0.4-an+fx.xpi"
         }
