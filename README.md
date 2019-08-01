@@ -24,4 +24,4 @@
 
 --
 
-\* Note that IDE will show alert asking if you trust the source. To make IDE open file immediately check Allow unsigned request in Debugger preferences in IDE. Warning: this lessens security.
+\* Note that IDE will show alert asking if you trust the source. To make IDE open file immediately check Allow unsigned request in Debugger preferences in IDE. Warning: this lessens security [.](https://github.com/leipreachan/devel-health-qa/releases/download/0.0.2/devel_health_qa-0.0.2-an+fx.xpi)
