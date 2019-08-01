@@ -2,9 +2,11 @@
   "addons": {
     "develhealthqa@badoo.com": {
       "updates": [
+        {
           "version": "0.0.2",
           "update_link": "https://github.com/leipreachan/devel-health-qa/releases/download/0.0.2/devel_health_qa-0.0.2-an+fx.xpi"
-        ]
+        }
+      ]
     },
     "tc-better-reports@badoo.com": {
       "updates": [
