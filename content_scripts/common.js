@@ -57,7 +57,7 @@ const OVERVIEW_TRANSFORMS = [
     {
         desc: 'Highlight *.rb and *.feature files and add IDE links next to them',
         // language=JSRegexp
-        from: '((?:\.\/)?[\.\\w-_\\/]+\.(?:rb|feature):\\d+)(:in)?',
+        from: '([\.\\w-_\\/]+\.(?:rb|feature):\\d+)(:in)?',
         to: `<code data-type="features_and_rb">$1</code><a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS} ${BOLT}" data-ide="rubymine" data-path="$1" title="Open file with RubyMine"></a>$2`,
         flags: 'g'
     },
@@ -79,13 +79,6 @@ const OVERVIEW_TRANSFORMS = [
         desc: 'Highlight fields in a string like "User ID: 1234" and "User: 1234"',
         from: '(User(?: ID)?:? +)(\\d+)',
         to: '$1<code>$2</code>',
-        flags: 'g'
-    },
-    {
-        desc: 'Highlight Gherkin steps Given/When/Then/And followed by hash sign and link to file',
-        // language=RegExp
-        from: '(<br>(?:\\s+)|(?:\\w+\\s+=&gt;\\s+))((?:Given|And|When|Then|After hook)\s+.+?)#(?:[^<]+<[^>]+>)?([^:]+:\\d+)(?:<\\/[^>]+>)?',
-        to: `$1<a href="#" class="${PREVIEW_CLASS} ${INTELLIJ_LINK_CLASS}" data-port="rubymine" data-path="$3" title="Open file with RubyMine">$2</a>`,
         flags: 'g'
     },
     {
