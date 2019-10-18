@@ -195,6 +195,7 @@ function draw_sparkline() {
         for (let i in testResults) {
             const item = testResults[i],
                 value = item.hasAttribute('status') ? item.attributes.status.nodeValue : '',
+                duration = item.hasAttribute('duration') ? item.attributes.duration.nodeValue : false,
                 buildInfo = item.getElementsByTagName('build')[0],
                 buildTypeName = item.getElementsByTagName('buildType')[0].attributes.name.nodeValue,
                 rect = attrs(document.createElementNS('http://www.w3.org/2000/svg', 'rect'), {x, width});
@@ -218,8 +219,18 @@ function draw_sparkline() {
             const buildDate = item.getElementsByTagName('startDate')[0].textContent,
                 buildBranchName = buildInfo.hasAttribute('branchName') ? buildInfo.attributes.branchName.nodeValue : '<empty>',
                 t = /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(buildDate);
+            let duration_string = '';
+            if (duration) {
+                const mins_dec = duration/60000,
+                    mins = Math.trunc(mins_dec),
+                    sec_dec = (mins_dec - mins) * 60,
+                    sec = Math.trunc(sec_dec),
+                    ms =  Math.round((sec_dec - sec)*1000),
+                    sec_padded = (sec+'').padStart(2, '0');
+                duration_string = `\nduration: ${mins}m:${sec_padded}s,${ms}ms`;
+            }
             rect.titletime = `${t[1]}-${t[2]}-${t[3]} ${t[4]}:${t[5]}:${t[6]}`;
-            rect.title = `${buildTypeName}\nbranch: ${buildBranchName}`;
+            rect.title = `${buildTypeName}\nbranch: ${buildBranchName}${duration_string}`;
             rect.onmouseover = showPopup;
             rect.onmouseout = hidePopup;
             svgNode.appendChild(rect);
@@ -255,7 +266,7 @@ function draw_sparkline() {
         }
 
         const
-            testResultsUrl = `${tcEntryPoint}?fields=testOccurrence(status,build(id,branchName,buildType(name),startDate))&locator=test:${testId},ignored:false,count:${SPARKLINE_POINTS}`;
+            testResultsUrl = `${tcEntryPoint}?fields=testOccurrence(status,duration,build(id,branchName,buildType(name),startDate))&locator=test:(id:${testId}),ignored:false,count:${SPARKLINE_POINTS}`;
 
         if (this.firstChild) this.removeChild(this.firstChild);
 
