@@ -17,7 +17,11 @@
       ]
     },
     "tc-better-reports@badoo.com": {
-      "updates": [
+      "updates": [        
+        {
+          "version": "0.2.11.0",
+          "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.2.11/tc_better_reports-0.2.11.0-an+fx.xpi"
+        },  
         {
           "version": "0.2.10.0",
           "update_link": "https://github.com/leipreachan/tc-better-reports/releases/download/0.2.10.0/tc_better_reports-0.2.10.0-an+fx.xpi"
