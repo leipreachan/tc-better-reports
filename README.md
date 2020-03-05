@@ -1,3 +1,17 @@
+# IMPORTANT UPDATE
+
+It took me some time but now you can use a teamcity plugin with similar set of features. https://github.com/leipreachan/better-test-reports-java. 
+Pros: 
+
+1. you don't need to distribute browser extension
+2. new features, soon
+
+Cons: 
+
+1. you need to install plugin into every Teamcity instance you have :(
+
+
+
 ## Features
 
 * it transforms links in TC reports into proper `<a>` tag
